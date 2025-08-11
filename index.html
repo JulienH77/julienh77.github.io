@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Prototype Globe + Dashboard</title>
+  <style>
+    :root{--gap:12px;--bg:#0f1720;--panel:#0b1220;--accent:#06b6d4;--muted:#94a3b8}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#081126 0%, #071426 100%);color:#e6eef6;font-family:Inter,system-ui,Arial}
+    .app{display:flex;height:100vh;gap:var(--gap);padding:var(--gap)}
+    .left{width:33%;min-width:300px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,0.6);display:flex;flex-direction:column}
+    .right{flex:1;border-radius:12px;overflow:hidden;position:relative}
+    h1{margin:0 0 8px 0;font-size:18px}
+    .sub{color:var(--muted);font-size:13px;margin-bottom:12px}
+    .card{background:rgba(255,255,255,0.02);border-radius:10px;padding:12px;margin-bottom:12px}
+    #stats{flex:1;overflow:auto}
+    .stat-row{display:flex;justify-content:space-between;padding:8px 6px;border-bottom:1px dashed rgba(255,255,255,0.03)}
+    .btn{display:inline-block;padding:8px 10px;border-radius:8px;background:linear-gradient(90deg,var(--accent),#60a5fa);color:#012;cursor:pointer;font-weight:600}
+    input[type=file]{display:none}
+    .small{font-size:13px;color:var(--muted)}
+    .routes-list{max-height:220px;overflow:auto}
+    .route-item{padding:8px;border-radius:8px;margin-bottom:8px;background:rgba(255,255,255,0.01);cursor:pointer}
+    .route-item.active{outline:2px solid rgba(6,182,212,0.18);background:linear-gradient(90deg, rgba(6,182,212,0.06), transparent)}
+    .city-modal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#021426;padding:16px;border-radius:12px;display:none;z-index:50;min-width:300px}
+    .city-modal img{max-width:100%;border-radius:8px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .footer{font-size:12px;color:var(--muted);margin-top:8px}
+    /* small screens */
+    @media(max-width:900px){.left{display:none}.right{width:100%}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="left">
+      <div class="topbar">
+        <div>
+          <h1>Tableau de bord</h1>
+          <div class="sub">Sélectionne une route ou une ville pour voir les stats</div>
+        </div>
+        <div><button id="uploadBtn" class="btn">Charger GeoJSON</button>
+          <input id="fileInput" type="file" accept="application/geo+json,application/json,.geojson"></div>
+      </div>
+
+      <div class="card">
+        <strong>Trajets chargés</strong>
+        <div class="routes-list" id="routesList">Aucun trajet pour l'instant. Charge un GeoJSON (LineString / MultiLineString).</div>
+      </div>
+
+      <div class="card">
+        <strong>Statistiques</strong>
+        <div id="stats">
+          <div class="stat-row"><div>Distance totale</div><div id="stat-distance">—</div></div>
+          <div class="stat-row"><div>Durée estimée</div><div id="stat-duration">—</div></div>
+          <div class="stat-row"><div>Transport</div><div id="stat-transport">—</div></div>
+          <div class="stat-row"><div>Vitesse moyenne</div><div id="stat-speed">—</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <strong>Instructions</strong>
+        <div class="small">
+          • Mets tes photos dans un dossier <code>images/</code> à côté du fichier HTML (noms: <code>munich.jpg</code> etc.).<br>
+          • Héberge sur <strong>GitHub Pages</strong> ou Netlify pour éviter les problèmes de CORS.<br>
+          • Ton GeoJSON doit être en <code>LineString</code> ou <code>MultiLineString</code>. Ajoute une propriété <code>transport</code> (ex: "train","voiture","velo").
+        </div>
+        <div class="footer">Prototype — modifie comme tu veux.</div>
+      </div>
+    </div>
+
+    <div class="right">
+      <div id="globeViz" style="width:100%;height:100%"></div>
+
+      <div class="city-modal" id="cityModal">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong id="cityTitle">Ville</strong><button id="closeModal" class="btn">Fermer</button></div>
+        <div id="cityPhotos"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- libs -->
+  <script src="https://unpkg.com/three@0.150.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/three@0.150.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://unpkg.com/topojson-client@3"></script>
+  <script src="https://unpkg.com/three-globe@4.5.5"></script>
+
+  <script>
+  // ---------- helpers ----------
+  const toRad = (d)=>d*Math.PI/180;
+  function haversine(a,b){
+    const R=6371; // km
+    const dLat=toRad(b[1]-a[1]), dLon=toRad(b[0]-a[0]);
+    const lat1=toRad(a[1]), lat2=toRad(b[1]);
+    const sin=(x)=>Math.sin(x/2);
+    const aa=sin(dLat)*sin(dLat)+Math.cos(lat1)*Math.cos(lat2)*sin(dLon)*sin(dLon);
+    return 2*R*Math.asin(Math.sqrt(aa));
+  }
+
+  // ---------- minimal city data (coords are [lng, lat]) ----------
+  const CITIES = [
+    {id:'munich', name:'Munich', coords:[11.576124,48.137154], photos:['images/munich1.jpg','images/munich2.jpg']},
+    {id:'salzburg', name:'Salzbourg', coords:[13.043081,47.80949], photos:['images/salzburg1.jpg']},
+    {id:'budapest', name:'Budapest', coords:[19.040236,47.497912], photos:['images/budapest1.jpg']},
+    {id:'prague', name:'Prague', coords:[14.4378,50.0755], photos:['images/prague1.jpg']},
+    {id:'regensburg', name:'Ratisbonne', coords:[12.0970,49.0139], photos:['images/regensburg1.jpg']},
+    {id:'ulm', name:'Ulm', coords:[9.9937,48.4011], photos:['images/ulm1.jpg']},
+    {id:'vienna', name:'Vienne', coords:[16.373819,48.208174], photos:['images/vienna1.jpg']}
+  ];
+
+  // ---------- scene & globe ----------
+  const scene = new THREE.Scene();
+  const renderer = new THREE.WebGLRenderer({antialias:true,alpha:true});
+  renderer.setSize(window.innerWidth*0.66, window.innerHeight);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  document.getElementById('globeViz').appendChild(renderer.domElement);
+
+  const camera = new THREE.PerspectiveCamera();
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  camera.position.z = 400;
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enablePan = false;
+  controls.minDistance = 101; controls.maxDistance = 700;
+
+  const Globe = new ThreeGlobe({showAtmosphere:true})
+    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg')
+    .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
+    .showGraticules(true)
+    .graticuleColor('rgba(255,255,255,0.06)')
+    .polygonsTransitionDuration(300)
+  scene.add(Globe);
+
+  // ambient lights
+  scene.add(new THREE.AmbientLight(0xbbbbbb));
+  const dir = new THREE.DirectionalLight(0xffffff, 0.6);
+  dir.position.set(1,1,1);
+  scene.add(dir);
+
+  // resize handling
+  function onResize(){
+    const el = document.getElementById('globeViz');
+    renderer.setSize(el.clientWidth, el.clientHeight);
+    camera.aspect = el.clientWidth / el.clientHeight;
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener('resize', onResize);
+
+  // load country polygons (topojson -> geojson)
+  fetch('https://unpkg.com/world-atlas@2/countries-110m.json').then(r=>r.json()).then(worldTopo=>{
+    const countries = topojson.feature(worldTopo, worldTopo.objects.countries);
+    Globe.polygonsData(countries.features)
+      .polygonCapColor(()=>'rgba(200,200,200,0.06)')
+      .polygonSideColor(()=>'rgba(30,30,30,0.15)')
+      .polygonLabel(({properties}) => `${properties.name || properties.adm0_a3}`)
+      .onPolygonClick((poly)=>{
+        // center on country centroid
+        const c = poly.properties.centroid || [poly.bbox ? (poly.bbox[0]+poly.bbox[2])/2:0, poly.bbox ? (poly.bbox[1]+poly.bbox[3])/2:0];
+        if(poly.properties && poly.properties.longitude && poly.properties.latitude) centerOn([poly.properties.longitude, poly.properties.latitude]);
+      });
+  }).catch(err=>console.warn('Impossible de charger les polygones',err));
+
+  // add city points
+  const points = CITIES.map(c=>({...c, lat:c.coords[1], lng:c.coords[0], size: 0.9}));
+  Globe.pointsData(points)
+    .pointLat('lat')
+    .pointLng('lng')
+    .pointLabel(d=>`${d.name}`)
+    .pointAltitude(0.01)
+    .pointRadius(0.7)
+    .pointsTransitionDuration(0);
+
+  // handle clicks on points
+  Globe.onPointClick(city => {
+    // zoom in with pointOfView
+    const lat = city.lat, lng = city.lng;
+    Globe.pointOfView({lat, lng, altitude: 0.9}, 1000);
+    showCityModal(city);
+  });
+
+  // routes data store
+  let ROUTES = [];
+  const routesGroup = new THREE.Group();
+  scene.add(routesGroup);
+
+  function clearRoutes(){
+    while(routesGroup.children.length) routesGroup.remove(routesGroup.children[0]);
+    ROUTES = [];
+    document.getElementById('routesList').innerHTML = 'Aucun trajet...';
+    updateStats(null);
+  }
+
+  function addRouteFromCoords(coords, props, idx){
+    // coords: array of [lng,lat] — draw as segments between consecutive points as arcs
+    const material = new THREE.LineBasicMaterial({linewidth:2});
+    // color by transport
+    const color = transportColor(props && props.transport);
+    material.color = new THREE.Color(color);
+
+    const pts = new THREE.BufferGeometry();
+    const positions = [];
+    coords.forEach((c)=>{
+      const xyz = latLonToVector3(c[1], c[0], 100);
+      positions.push(xyz.x, xyz.y, xyz.z);
+    });
+    pts.setAttribute('position', new THREE.Float32BufferAttribute(positions,3));
+    const line = new THREE.Line(pts, material);
+    line.userData = {props, coords, idx};
+    routesGroup.add(line);
+    ROUTES.push(line);
+  }
+
+  function transportColor(t){
+    if(!t) return '#aaaaaa';
+    t = t.toLowerCase();
+    if(t.includes('train')) return '#f97316';
+    if(t.includes('voiture')||t.includes('car')||t.includes('auto')) return '#ef4444';
+    if(t.includes('velo')||t.includes('bike')) return '#10b981';
+    if(t.includes('avion')||t.includes('flight')||t.includes('plane')) return '#60a5fa';
+    return '#c084fc';
+  }
+
+  function latLonToVector3(lat, lon, radius){
+    const phi = (90 - lat) * Math.PI / 180;
+    const theta = (lon + 180) * Math.PI / 180;
+    return new THREE.Vector3(
+      - (radius) * Math.sin(phi) * Math.cos(theta),
+      (radius) * Math.cos(phi),
+      (radius) * Math.sin(phi) * Math.sin(theta)
+    );
+  }
+
+  // file upload
+  const fileInput = document.getElementById('fileInput');
+  document.getElementById('uploadBtn').addEventListener('click', ()=>fileInput.click());
+  fileInput.addEventListener('change', async (ev)=>{
+    const f = ev.target.files[0];
+    if(!f) return;
+    const txt = await f.text();
+    let geo;
+    try{geo = JSON.parse(txt);}catch(e){alert('Fichier non reconnu');return}
+    handleGeoJSON(geo);
+  });
+
+  function handleGeoJSON(geo){
+    clearRoutes();
+    const features = geo.type === 'FeatureCollection' ? geo.features : (geo.type==='Feature'? [geo] : []);
+    const listEl = document.getElementById('routesList');
+    listEl.innerHTML = '';
+    features.forEach((ft, i)=>{
+      const geom = ft.geometry;
+      const props = ft.properties||{};
+      let lines = [];
+      if(geom.type === 'LineString') lines.push(geom.coordinates);
+      else if(geom.type === 'MultiLineString') geom.coordinates.forEach(c=>lines.push(c));
+      else return; // ignore others
+
+      lines.forEach((coords, li)=>{
+        addRouteFromCoords(coords, props, ROUTES.length);
+        const item = document.createElement('div');
+        item.className = 'route-item';
+        item.innerHTML = `<strong>${props.name||('Trajet '+(ROUTES.length))}</strong><div class="small">transport: ${props.transport||'—'}</div>`;
+        item.addEventListener('click', ()=>selectRoute(ROUTES.length-1, item));
+        listEl.appendChild(item);
+      });
+    });
+    if(listEl.children.length===0) listEl.innerHTML='Aucun trajet LineString trouvé.';
+  }
+
+  function selectRoute(idx, itemEl){
+    // highlight
+    document.querySelectorAll('.route-item').forEach(n=>n.classList.remove('active'));
+    if(itemEl) itemEl.classList.add('active');
+    ROUTES.forEach((r, i)=>{
+      r.material.opacity = i===idx?1.0:0.15;
+      r.material.linewidth = i===idx?4:2;
+    });
+    // compute stats
+    const r = ROUTES[idx];
+    if(!r) return;
+    const coords = r.userData.coords;
+    let dist=0; for(let i=1;i<coords.length;i++) dist+=haversine(coords[i-1], coords[i]);
+    const transport = (r.userData.props && r.userData.props.transport) || '—';
+    const duration = Math.round(dist/60*60); // fake: assume avg 60km/h -> duration in minutes
+    const speed = (60).toFixed(0);
+    updateStats({distance:dist.toFixed(1)+' km', duration: duration+' min', transport, speed: speed+' km/h'});
+    // center on middle of the route
+    const mid = coords[Math.floor(coords.length/2)];
+    Globe.pointOfView({lat: mid[1], lng: mid[0], altitude: 0.9}, 1000);
+  }
+
+  function updateStats(s){
+    document.getElementById('stat-distance').innerText = s? s.distance : '—';
+    document.getElementById('stat-duration').innerText = s? s.duration : '—';
+    document.getElementById('stat-transport').innerText = s? s.transport : '—';
+    document.getElementById('stat-speed').innerText = s? s.speed : '—';
+  }
+
+  // city modal
+  const cityModal = document.getElementById('cityModal');
+  const cityTitle = document.getElementById('cityTitle');
+  const cityPhotos = document.getElementById('cityPhotos');
+  document.getElementById('closeModal').addEventListener('click', ()=>cityModal.style.display='none');
+
+  function showCityModal(city){
+    cityTitle.innerText = city.name;
+    cityPhotos.innerHTML = '';
+    const cityData = CITIES.find(c=>c.name===city.name || c.id===city.id);
+    if(cityData && cityData.photos && cityData.photos.length){
+      cityData.photos.forEach(p=>{
+        const img = document.createElement('img'); img.src = p; img.alt = cityData.name; img.onerror = ()=>{img.style.display='none'};
+        cityPhotos.appendChild(img);
+      });
+    } else {
+      cityPhotos.innerHTML = '<div class="small">Aucune photo trouvée pour cette ville. Mets des fichiers dans le dossier images/ avec les bons noms.</div>';
+    }
+    cityModal.style.display = 'block';
+  }
+
+  // animate
+  (function animate(){
+    requestAnimationFrame(animate);
+    Globe.rotation.y += 0.0005; // slow auto-rotation
+    controls.update();
+    renderer.render(scene, camera);
+  })();
+
+  // initial view
+  Globe.pointOfView({lat:48, lng:10, altitude: 2.5});
+
+  // expose for debug
+  window.GlobeApp = {Globe, ROUTES};
+  </script>
+</body>
+</html>
