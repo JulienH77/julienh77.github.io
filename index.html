@@ -112,7 +112,8 @@ chart.setOption({
     baseTexture: earthTexture,
     heightTexture: nightTexture,
     shading: 'lambert',
-    light: { main: { intensity: 1 }, ambient: { intensity: 0.1 } },
+    postEffect: { enable: true },
+    light: { main: { intensity: 1 }, ambient: { intensity: 0.3 } },
     viewControl: { autoRotate: true, autoRotateSpeed: 5 }
   },
   series: [{
@@ -123,7 +124,7 @@ chart.setOption({
     lineStyle: { width: 2, opacity: 0.8 },
     data: seriesData
   }]
-});
+});   
 </script>
 </body>
 </html>
