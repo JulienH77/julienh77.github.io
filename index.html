@@ -21,10 +21,11 @@ html, body {
 <body>
 <div id="main"></div>
 <script>
-// --- Textures en Base64 (terre jour/nuit)
+// --- Textures
 const earthTexture = './earth.jpg';
 const nightTexture = './night.jpg';
 const bathymetryTexture = './world.topo.bathy.200401.jpg';
+const elevbumpTexture = './elev_bump_4k.jpg';
 
 
 // --- GeoJSON trajets en dur ---
@@ -111,7 +112,8 @@ chart.setOption({
   globe: {
     baseTexture: bathymetryTexture,
     // heightTexture: nightTexture,
-    heightTexture: bathymetryTexture,
+    // heightTexture: bathymetryTexture,
+    heightTexture: elevbumpTexture,
 
     shading: 'lambert',
     //postEffect: { enable: true },
