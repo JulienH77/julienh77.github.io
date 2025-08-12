@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<title>Globe avec switch Terre / Nuit stylé + Lune</title>
+<title>Globe interactif avec jour/nuit, capitales, pays, trajets</title>
 <style>
   html, body, #main {
     margin: 0; padding: 0; width: 100%; height: 100%;
@@ -10,58 +10,49 @@
     background: url('./starfield.jpg') no-repeat center center fixed;
     background-size: cover;
   }
-  #main { position: relative; }
-
-  /* Toggle switch stylé */
+  #main {
+    position: relative;
+  }
+  /* Style bouton switch jour/nuit */
   #switcher {
     position: absolute;
-    top: 15px; right: 15px;
-    width: 80px; height: 38px;
-    background: #444;
+    top: 20px; left: 20px;
+    width: 100px; height: 40px;
+    background: linear-gradient(90deg, #ffe066 50%, #4a90e2 50%);
     border-radius: 20px;
     cursor: pointer;
+    box-shadow: 0 0 8px rgba(0,0,0,0.3);
     user-select: none;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 6px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.6);
-    z-index: 10;
-    transition: background 0.3s;
+    padding: 0 5px;
+    font-weight: bold;
+    color: #333;
+    font-family: Arial, sans-serif;
   }
-  #switcher:hover {
-    background: #666;
+  #switcher.night {
+    background: linear-gradient(90deg, #4a90e2 50%, #ffe066 50%);
+    color: #222;
   }
-
-  #switcher .toggle-ball {
-    position: absolute;
-    top: 3px; left: 3px;
-    width: 32px; height: 32px;
-    background: #ffdd55;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #ffdd55;
-    transition: left 0.3s;
-    z-index: 15;
-  }
-
-  #switcher.night .toggle-ball {
-    left: 45px;
-    background: #f0e68c;
-    box-shadow: 0 0 12px #f0e68c;
-  }
-
-  #switcher svg {
-    width: 20px; height: 20px;
-    fill: #ffdd55;
+  #switcher .icon {
+    flex: 1;
+    text-align: center;
+    font-size: 20px;
     pointer-events: none;
-    user-select: none;
-    transition: fill 0.3s;
   }
-  #switcher.night svg.sun {
-    fill: #888;
+  #switcher .sun {
+    order: 0;
   }
-  #switcher.night svg.moon {
-    fill: #f0e68c;
+  #switcher .moon {
+    order: 1;
+  }
+  #switcher.night .sun {
+    order: 1;
+    opacity: 0.5;
+  }
+  #switcher.night .moon {
+    order: 0;
+    opacity: 1;
   }
 </style>
 
@@ -69,49 +60,34 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
 </head>
 <body>
-
 <div id="main"></div>
-
-<div id="switcher" title="Changer fond Terre / Nuit">
-  <svg class="sun" viewBox="0 0 24 24" style="z-index:10;">
-    <circle cx="12" cy="12" r="5"/>
-    <g stroke="#ffdd55" stroke-width="2">
-      <line x1="12" y1="1" x2="12" y2="4"/>
-      <line x1="12" y1="20" x2="12" y2="23"/>
-      <line x1="4.2" y1="4.2" x2="6.4" y2="6.4"/>
-      <line x1="17.6" y1="17.6" x2="19.8" y2="19.8"/>
-      <line x1="1" y1="12" x2="4" y2="12"/>
-      <line x1="20" y1="12" x2="23" y2="12"/>
-      <line x1="4.2" y1="19.8" x2="6.4" y2="17.6"/>
-      <line x1="17.6" y1="6.4" x2="19.8" y2="4.2"/>
-    </g>
-  </svg>
-  <svg class="moon" viewBox="0 0 24 24" style="z-index:10;">
-    <path d="M21 12.79A9 9 0 0112.21 3a7 7 0 000 14 9 9 0 018.79-4.21z" />
-  </svg>
-  <div class="toggle-ball"></div>
+<div id="switcher" title="Changer entre jour et nuit">
+  <div class="icon sun">☀️</div>
+  <div class="icon moon">🌙</div>
 </div>
 
 <script>
 (async function(){
-  const earthTexture = './earth.jpg';
-  const nightTexture = './night.jpg'; // la texture nuit d'origine (on va appliquer un filtre jaune en option)
+  const dayTexture = './earth.jpg';
+  const nightTexture = './night.jpg';
   const cloudTexture = './clouds.png';
-  const moonBaseTexture = './moon-base.jpg';
-  const moonBumpTexture = './moon-bump.jpg';
 
   const chart = echarts.init(document.getElementById('main'));
 
   async function loadGeojson(url) {
+    console.log("Chargement de ", url);
     const res = await fetch(url);
-    if(!res.ok) throw new Error("Erreur chargement " + url);
-    return await res.json();
+    if(!res.ok) throw new Error("Erreur chargement " + url + " code: " + res.status);
+    const json = await res.json();
+    console.log("Données chargées depuis", url, json);
+    return json;
   }
 
   const countries = await loadGeojson('./countries_10m_new.geojson');
-  const capitalsGeojson = await loadGeojson('./capitals.geojson');
+  const trajets = await loadGeojson('./ALLLINE_TRAJET_wgs.geojson');
+  const capitals = await loadGeojson('./capitals.geojson');
 
-  // Construction frontières pays
+  // Préparation des lignes des pays (frontières)
   const countryLines = [];
   countries.features.forEach(feature => {
     if(!feature.geometry) return;
@@ -134,120 +110,101 @@
     }
   });
 
-  // Capitales (points petits blancs, contours noirs)
-  const capitalPoints = capitalsGeojson.features.map(f => ({
+  // Capitales - points blancs avec contour noir fin, opacity 0 (invisible)
+  const capitalPoints = capitals.features.map(f => ({
     name: f.properties.name || '',
     value: [f.geometry.coordinates[0], f.geometry.coordinates[1], 0],
-    symbolSize: 4,
+    symbolSize: 5,
     itemStyle: {
       color: '#fff',
       borderColor: '#000',
-      borderWidth: 1,
-      opacity: 0.8
+      borderWidth: 0.5,
+      opacity: 0
     }
   }));
 
-  // Initial display mode
-  let isNight = false;
-
-  // Position de départ sur Europe
-  // Globe rotation en radians sur longitude et latitude (globe.rotate)
-  // On tourne vers approx. 10°E, 50°N
-  const initialRotation = [ -10, -50 ]; // rotation en degrés pour globe.rotate (soustrait à coord camera)
-
-  // Conversion en radians:
-  const toRad = deg => deg * Math.PI / 180;
-
-  // Position lune en longitude/latitude
-  // Place approximative - tu peux mettre une vraie position avec calcul astronomie
-  const moonLonLat = { lon: 134, lat: 13 };
-
-  // Fonction pour convertir lon/lat en XYZ sur sphère radius 100 (globe radius)
-  function lonLatToCartesian(lon, lat, radius=100) {
-    const radLon = lon * Math.PI / 180;
-    const radLat = lat * Math.PI / 180;
-    const x = radius * Math.cos(radLat) * Math.cos(radLon);
-    const y = radius * Math.sin(radLat);
-    const z = radius * Math.cos(radLat) * Math.sin(radLon);
-    return [x, y, z];
-  }
-
-  // Données lune en mesh 3D
-  const moonData = {
-    type: 'mesh3D',
-    name: 'Lune',
-    silent: true,
-    shading: 'lambert',
-    realisticMaterial: {
-      texture: moonBaseTexture,
-      normalTexture: moonBumpTexture,
-      roughness: 1,
-      metalness: 0
-    },
-    // Sphere de rayon 15 un peu à l'extérieur du globe (radius globe = 100)
-    shape: 'sphere',
-    sphereRadius: 15,
-    itemStyle: { opacity: 1 },
-    // Position
-    // Il faut convertir lon/lat lune en xyz (attention y = latitude)
-    // Position dynamique plus tard possible
-    // On donnera la position dans option globe "globeCoord" (avec "globe" il faut positionner par "globeCoord" dans mesh3D)
-    globeCoord: lonLatToCartesian(moonLonLat.lon, moonLonLat.lat, 115)
+  // Couleurs par trajet
+  const couleurParTrajet = {
+    "trajet1": "#1f77b4",
+    "trajet2": "#ff7f0e",
+    "trajet3": "#2ca02c",
+    "trajet4": "#d62728",
   };
 
-  // Option de base avec globe centré sur Europe
-  let option = {
-    backgroundColor: 'transparent',
+  // Trajets lignes, décompose MultiLineString
+  const trajetLines = [];
+  trajets.features.forEach(f => {
+    if(!f.geometry) return;
+    const type = f.geometry.type;
+    const trajetType = f.properties?.trajet || "default";
+    const color = couleurParTrajet[trajetType] || '#00ffff';
+
+    if(type === 'LineString') {
+      trajetLines.push({
+        coords: f.geometry.coordinates.map(c => [c[0], c[1]]),
+        lineStyle: { color: color, width: 3, opacity: 1 }
+      });
+    } else if(type === 'MultiLineString') {
+      f.geometry.coordinates.forEach(line => {
+        trajetLines.push({
+          coords: line.map(c => [c[0], c[1]]),
+          lineStyle: { color: color, width: 3, opacity: 1 }
+        });
+      });
+    }
+  });
+
+  // Initial position au-dessus de l'Europe (longitude, latitude)
+  const initView = {
+    center: [10, 50], // approximatif (France-Allemagne)
+    distance: 150
+  };
+
+  // Options du globe et séries
+  const option = {
+    legend: {
+      show: true,
+      orient: 'vertical',
+      right: 20,
+      top: 20,
+      textStyle: { color: '#fff' },
+      selected: {
+        'Pays': true,
+        'Trajets': true,
+        'Capitales': false
+      }
+    },
     globe: {
-      baseTexture: earthTexture,
+      baseTexture: dayTexture,
       nightTexture: nightTexture,
       shading: 'lambert',
       postEffect: { enable: true },
-      light: { 
-        main: { intensity: 1, shadow: true, shadowQuality: 'high' }, 
-        ambient: { intensity: 0.1 } 
+      light: {
+        main: { intensity: 1, shadow: true, shadowQuality: 'high' },
+        ambient: { intensity: 0.1 }
       },
-      viewControl: { 
-        autoRotate: true, 
-        autoRotateSpeed: 5, 
-        distance: 160,
-        alpha: 20,
-        beta: 0,
-        minDistance: 100,
-        maxDistance: 300,
-        rotateSensitivity: 1,
-        zoomSensitivity: 1
+      viewControl: {
+        autoRotate: true,
+        autoRotateSpeed: 3,
+        targetCoord: initView.center,
+        distance: initView.distance,
+        zoomSensitivity: 2,
+        rotateSensitivity: 2,
+        panSensitivity: 2,
+        // Pour bien tourner sans problème
+        animationDurationUpdate: 500
       },
       layers: [
-        {
-          type: 'blend',
-          texture: cloudTexture,
-          shading: 'lambert',
-          blendMode: 'lighter',
-          intensity: 0.7,
-          shadingAlpha: 0.5,
-          // Suppression rotation nuages
-          autoRotate: false,
-          distance: 105,
-          fade: true,
-          visibility: true
-        }
-      ],
-      // Position initiale
-      center: [0, 0],
-      globeRadius: 100,
-      environment: 'none'
+        { type: 'overlay', texture: cloudTexture, shading: 'lambert', distance: 2.0, blendTo: 'emission', visibility: true }
+      ]
     },
     series: [
       {
+        name: 'Pays',
         type: 'lines3D',
         coordinateSystem: 'globe',
         blendMode: 'lighter',
-        lineStyle: {
-          color: '#aaa',
-          width: 0.5,
-          opacity: 0.4
-        },
+        lineStyle: { width: 1, opacity: 0.9, color: '#fff' },
         data: countryLines,
         silent: true
       },
@@ -256,96 +213,66 @@
         type: 'scatter3D',
         coordinateSystem: 'globe',
         symbol: 'circle',
-        symbolSize: 6,
-        itemStyle: {
-          color: '#fff',
-          borderColor: '#000',
-          borderWidth: 1
-        },
+        symbolSize: 5,
+        itemStyle: { color: '#fff', borderColor: '#000', borderWidth: 0.5, opacity: 0 },
         data: capitalPoints,
         silent: true
       },
-      moonData
+      {
+        name: 'Trajets',
+        type: 'lines3D',
+        coordinateSystem: 'globe',
+        blendMode: 'lighter',
+        lineStyle: { width: 3, opacity: 1, color: '#00ffff' },
+        data: trajetLines,
+        silent: true
+      }
     ]
   };
 
   chart.setOption(option);
 
-  // Recentre la vue sur Europe (10E, 50N)
-  chart.setOption({
-    globe: {
-      viewControl: {
-        targetCoord: [10, 50]
-      }
+  // Gérer l’affichage des capitales en fonction du zoom
+  chart.getZr().on('wheel', () => {
+    const optionNow = chart.getOption();
+    const zoom = chart.getModel().getComponent('globe').getViewControl().distance;
+    // Affiche capitales si zoom < 120 (plus proche), cache sinon
+    const capitalesSeries = optionNow.series.find(s => s.name === 'Capitales');
+    if(capitalesSeries) {
+      const opacity = (zoom < 120) ? 1 : 0;
+      capitalesSeries.itemStyle.opacity = opacity;
+      capitalesSeries.data.forEach(p => p.itemStyle = p.itemStyle || {});
+      capitalesSeries.data.forEach(p => p.itemStyle.opacity = opacity);
+      chart.setOption({ series: optionNow.series });
     }
   });
 
-  // Switch Terre / Nuit
+  // Bouton switch jour/nuit
   const switcher = document.getElementById('switcher');
-  let cloudsVisible = true;
+  let isNight = false;
+  switcher.addEventListener('click', () => {
+    isNight = !isNight;
+    switcher.classList.toggle('night', isNight);
+    updateNightMode(isNight);
+  });
 
-  function updateNightMode(night){
-    isNight = night;
-    if(night){
-      // On applique un filtre jaune/orangé sur la texture nuit via postEffect colorFilter
-      chart.setOption({
-        globe: {
-          nightTexture: nightTexture,
-          postEffect: {
-            enable: true,
-            bloom: { enable: true, intensity: 0.3 },
-            colorFilter: { enable: true, color: '#f1d56d' } // jaune chaud
-          },
-          layers: [
-            {
-              visibility: false // Nuages invisibles la nuit
-            }
-          ]
-        }
-      });
-    } else {
-      chart.setOption({
-        globe: {
-          nightTexture: nightTexture,
-          postEffect: { enable: true, bloom: { enable: true, intensity: 0.3 }, colorFilter: { enable: false }},
-          layers: [
-            {
-              visibility: true // Nuages visibles le jour
-            }
-          ]
-        }
-      });
-    }
-    // Toggle style bouton
-    switcher.classList.toggle('night', night);
+  function updateNightMode(night) {
+    chart.setOption({
+      globe: {
+        baseTexture: night ? nightTexture : dayTexture,
+        postEffect: night
+          ? { enable: true, colorFilter: { enable: true, color: '#f1d56d' } }
+          : { enable: true, colorFilter: { enable: false } },
+        layers: [
+          { type: 'overlay', texture: cloudTexture, shading: 'lambert', distance: 2.0, blendTo: 'emission', visibility: !night }
+        ]
+      }
+    });
   }
 
-  switcher.addEventListener('click', () => {
-    updateNightMode(!isNight);
-  });
-
+  // initial appel pour être sûr que tout est en jour au départ
   updateNightMode(false);
-
-  // Gestion affichage capitales au zoom (distance)
-  chart.on('georoam', function(params){
-    const distance = chart.getOption().globe.viewControl.distance;
-    const capitalsVisible = distance < 160; // seuil a ajuster
-    chart.setOption({
-      series: [{
-        name: 'Capitales',
-        itemStyle: {
-          opacity: capitalsVisible ? 1 : 0
-        }
-      }]
-    });
-  });
-
-  // Correction rotation nuages
-  // (Si nuages empêchent drag, on désactive autoRotate et on laisse drag actif)
-  // Pas besoin de code supplémentaire ici, vu que nuages n'ont plus autoRotate
-
 })();
 </script>
-
 </body>
 </html>
