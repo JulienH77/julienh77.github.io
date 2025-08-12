@@ -73,8 +73,8 @@
   const capitalPoints = capitals.features.map(f => ({
     name: f.properties.name || '',
     value: [f.geometry.coordinates[0], f.geometry.coordinates[1], 0],
-    symbolSize: 8,
-    itemStyle: { color: 'yellow' }
+    symbolSize: 3,
+    itemStyle: { color: 'white' }
   }));
 
   // Mapping couleur selon le champ "trajet"
