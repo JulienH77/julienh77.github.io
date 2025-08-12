@@ -1,135 +1,132 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>Globe avec trajets</title>
+<meta charset="UTF-8" />
+<title>Globe avec pays, capitales et nuages</title>
 <style>
-html, body {
-    margin: 0;
-    height: 100%;
-    background: #000;
-}
-#main {
-    width: 100%;
-    height: 100%;
-}
+  html, body, #main {
+    margin: 0; padding: 0; width: 100%; height: 100%;
+    overflow: hidden;
+  }
+  body {
+    background: url('./starfield.jpg') no-repeat center center fixed;
+    background-size: cover;
+  }
+  #main {
+    position: relative;
+  }
 </style>
-<!-- ECharts + GL -->
+
+<!-- Scripts ECharts + ECharts-GL -->
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
 </head>
 <body>
 <div id="main"></div>
+
 <script>
-// --- Textures
-const earthTexture = './earth.jpg';
-const nightTexture = './night.jpg';
-const bathymetryTexture = './world.topo.bathy.200401.jpg';
-const elevbumpTexture = './elev_bump_4k.jpg';
+(async function(){
 
+  // Textures base64 ou url locales
+  const earthTexture = "data:image/jpeg;base64,...";  // Remplace par ta base64 ici
+  const nightTexture = "data:image/jpeg;base64,...";  // Pareil
+  const cloudTexture = "./clouds.png";  // PNG dans ton repo
 
-// --- GeoJSON trajets en dur ---
-const trajets = {
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "properties": { "trajet": "avion" },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [2.55, 49.0097],      // CDG
-          [19.0402, 47.4979]    // Budapest
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": { "trajet": "train" },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [19.0402, 47.4979],   // Budapest
-          [14.4208, 50.0880]    // Prague
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": { "trajet": "bus" },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [14.4208, 50.0880],   // Prague
-          [12.0956, 49.0200]    // Regensburg
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": { "trajet": "train" },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [12.0956, 49.0200],   // Regensburg
-          [11.5820, 48.1351]    // Munich
-        ]
-      }
-    },
-    {
-      "type": "Feature",
-      "properties": { "trajet": "avion" },
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [11.5820, 48.1351],   // Munich
-          [2.55, 49.0097]       // CDG
-        ]
-      }
+  const chart = echarts.init(document.getElementById('main'));
+
+  // Charger GeoJSON en local
+  async function loadGeojson(url) {
+    const res = await fetch(url);
+    if(!res.ok) throw new Error("Erreur chargement " + url);
+    return await res.json();
+  }
+
+  // Load geojson
+  const countries = await loadGeojson('./countries_10m_new.geojson');
+  const capitals = await loadGeojson('./capitals.geojson');
+
+  // Transforme les frontières en séries 'lines3D' pour le globe
+  const countryLines = [];
+
+  countries.features.forEach(feature => {
+    const coords = [];
+
+    // MultiPolygon ou Polygon ?
+    if(feature.geometry.type === 'MultiPolygon') {
+      feature.geometry.coordinates.forEach(polygon => {
+        polygon.forEach(ring => {
+          coords.push(ring.map(c => [c[0], c[1]]));
+        });
+      });
+    } else if(feature.geometry.type === 'Polygon') {
+      feature.geometry.coordinates.forEach(ring => {
+        coords.push(ring.map(c => [c[0], c[1]]));
+      });
     }
-  ]
-};
 
-    
+    coords.forEach(line => {
+      countryLines.push({
+        coords: line,
+        lineStyle: { color: '#ff0000', width: 0.5 }
+      });
+    });
+  });
 
-// Palette de couleurs par type de trajet
-const colors = {
-  "avion": "#ff0000",
-  "train": "#00ff00",
-  "bus": "#0000ff"
-};
+  // Capitales en points
+  const capitalPoints = capitals.features.map(f => ({
+    name: f.properties.name || '',
+    value: [f.geometry.coordinates[0], f.geometry.coordinates[1], 0],
+    symbolSize: 8,
+    itemStyle: { color: 'yellow' }
+  }));
 
-// Convertir GeoJSON en format ECharts Lines
-const seriesData = trajets.features.map(f => ({
-  coords: f.geometry.coordinates.map(c => [c[0], c[1]]),
-  lineStyle: { color: colors[f.properties.trajet] || "#ffffff", width: 2 }
-}));
+  chart.setOption({
+    backgroundColor: 'transparent', // car le body a le background
+    globe: {
+      baseTexture: earthTexture,
+      nightTexture: nightTexture,
+      shading: 'lambert',
+      postEffect: { enable: true },
+      light: {
+        main: { intensity: 2, shadow: true, shadowQuality: 'high' },
+        ambient: { intensity: 0.3 }
+      },
+      viewControl: { autoRotate: true, autoRotateSpeed: 5 },
+      layers: [{
+        type: 'overlay',
+        texture: cloudTexture,
+        shading: 'lambert',
+        distance: 2.0,
+        blendTo: 'emission'
+      }]
+    },
+    series: [
+      {
+        name: 'Pays',
+        type: 'lines3D',
+        coordinateSystem: 'globe',
+        blendMode: 'lighter',
+        lineStyle: { width: 0.5, opacity: 0.8 },
+        data: countryLines
+      },
+      {
+        name: 'Capitales',
+        type: 'scatter3D',
+        coordinateSystem: 'globe',
+        symbol: 'circle',
+        symbolSize: 8,
+        itemStyle: {
+          color: 'yellow',
+          opacity: 1,
+          borderWidth: 1,
+          borderColor: 'black'
+        },
+        data: capitalPoints
+      }
+    ]
+  });
 
-// Initialiser le globe
-const chart = echarts.init(document.getElementById('main'));
-chart.setOption({
-  backgroundColor: '#000',
-  globe: {
-    baseTexture: bathymetryTexture,
-    // heightTexture: nightTexture,
-    // heightTexture: bathymetryTexture,
-    heightTexture: elevbumpTexture,
-    nightTexture: nightTexture,
-
-    shading: 'lambert',
-    //postEffect: { enable: true },
-    light: { main: { intensity: 1 }, ambient: { intensity: 0.1 } },
-    viewControl: { autoRotate: true, autoRotateSpeed: 2 }
-  },
-  series: [{
-    type: 'lines3D',
-    coordinateSystem: 'globe',
-    effect: { show: true, trailWidth: 2, trailLength: 0.2, trailOpacity: 1, trailColor: 'rgba(255,255,255,0.5)' },
-    blendMode: 'lighter',
-    lineStyle: { width: 2, opacity: 0.8 },
-    data: seriesData
-  }]
-});   
+})();
 </script>
 </body>
 </html>
