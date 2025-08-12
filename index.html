@@ -73,7 +73,7 @@
   const capitalPoints = capitals.features.map(f => ({
     name: f.properties.name || '',
     value: [f.geometry.coordinates[0], f.geometry.coordinates[1], 0],
-    symbolSize: 3,
+    symbolSize: 4,
     itemStyle: { color: 'white' }
   }));
 
@@ -142,11 +142,11 @@
         type: 'scatter3D',
         coordinateSystem: 'globe',
         symbol: 'circle',
-        symbolSize: 3,
+        symbolSize: 4,
         itemStyle: {
           color: 'white',
           opacity: 1,
-          borderWidth: 1,
+          borderWidth: 0.2,
           borderColor: 'black'
         },
         data: capitalPoints
