@@ -1,108 +1,125 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Globe interactif</title>
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-      background: #000;
-    }
-    #globe {
-      width: 100%;
-      height: 100%;
-    }
-  </style>
-  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
+<meta charset="UTF-8">
+<title>Globe avec trajets</title>
+<style>
+html, body {
+    margin: 0;
+    height: 100%;
+    background: #000;
+}
+#main {
+    width: 100%;
+    height: 100%;
+}
+</style>
+<!-- ECharts + GL -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
 </head>
 <body>
-<div id="globe"></div>
-
+<div id="main"></div>
 <script>
-// === Initialisation du globe ===
-var chart = echarts.init(document.getElementById('globe'));
+// --- Textures en Base64 (terre jour/nuit)
+const earthTexture = "data:image/jpeg;base64,REMAINS_BASE64_JPEG"; // Je vais te mettre une vraie image ici
+const nightTexture = "data:image/jpeg;base64,REMAINS_BASE64_JPEG";
 
-// Textures du globe en base64 pour éviter les blocages
-var earthTexture = 'https://echarts.apache.org/examples/data-gl/asset/earth.jpg';
-var earthBump = 'https://echarts.apache.org/examples/data-gl/asset/bathymetry_bw_composite_4k.jpg';
-
-// Configuration initiale
-var option = {
-  backgroundColor: '#000',
-  globe: {
-    baseTexture: earthTexture,
-    heightTexture: earthBump,
-    shading: 'realistic',
-    realisticMaterial: {
-      roughness: 0.8,
-      metalness: 0
-    },
-    light: {
-      ambient: { intensity: 0.5 },
-      main: { intensity: 0.5 }
-    },
-    viewControl: {
-      autoRotate: false,
-      targetCoord: [10, 50],
-      minDistance: 50,
-      maxDistance: 400
-    }
-  },
-  series: [
+// --- GeoJSON trajets en dur ---
+const trajets = {
+  "type": "FeatureCollection",
+  "features": [
     {
-      type: 'scatter3D',
-      coordinateSystem: 'globe',
-      symbolSize: 10,
-      itemStyle: { color: 'yellow' },
-      data: [
-        { name: 'Munich', value: [11.582, 48.135, 0] },
-        { name: 'Salzbourg', value: [13.041, 47.809, 0] },
-        { name: 'Budapest', value: [19.040, 47.497, 0] },
-        { name: 'Prague', value: [14.437, 50.075, 0] },
-        { name: 'Ratisbonne', value: [12.096, 49.019, 0] },
-        { name: 'Ulm', value: [9.993, 48.401, 0] },
-        { name: 'Vienne', value: [16.373, 48.208, 0] }
-      ]
+      "type": "Feature",
+      "properties": { "trajet": "avion" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [2.55, 49.0097],      // CDG
+          [19.0402, 47.4979]    // Budapest
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "trajet": "train" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [19.0402, 47.4979],   // Budapest
+          [14.4208, 50.0880]    // Prague
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "trajet": "bus" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [14.4208, 50.0880],   // Prague
+          [12.0956, 49.0200]    // Regensburg
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "trajet": "train" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [12.0956, 49.0200],   // Regensburg
+          [11.5820, 48.1351]    // Munich
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": { "trajet": "avion" },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [11.5820, 48.1351],   // Munich
+          [2.55, 49.0097]       // CDG
+        ]
+      }
     }
   ]
 };
 
-chart.setOption(option);
+// Palette de couleurs par type de trajet
+const colors = {
+  "avion": "#ff0000",
+  "train": "#00ff00",
+  "bus": "#0000ff"
+};
 
-// === Chargement des trajets ===
-fetch('trajets.geojson')
-  .then(res => res.json())
-  .then(geojson => {
-    const lignes = geojson.features.map(f => ({
-      coords: f.geometry.coordinates.map(coord => [coord[0], coord[1], 0]),
-      lineStyle: {
-        color: f.properties.trajet || 'white'
-      }
-    }));
+// Convertir GeoJSON en format ECharts Lines
+const seriesData = trajets.features.map(f => ({
+  coords: f.geometry.coordinates.map(c => [c[0], c[1]]),
+  lineStyle: { color: colors[f.properties.trajet] || "#ffffff", width: 2 }
+}));
 
-    chart.setOption({
-      series: [
-        option.series[0],
-        {
-          type: 'lines3D',
-          coordinateSystem: 'globe',
-          effect: {
-            show: true,
-            trailWidth: 2,
-            trailLength: 0.1,
-            trailOpacity: 0.8
-          },
-          lineStyle: { width: 2, opacity: 0.8 },
-          data: lignes
-        }
-      ]
-    });
-  })
-  .catch(err => console.error('Erreur chargement trajets.geojson:', err));
+// Initialiser le globe
+const chart = echarts.init(document.getElementById('main'));
+chart.setOption({
+  backgroundColor: '#000',
+  globe: {
+    baseTexture: earthTexture,
+    heightTexture: nightTexture,
+    shading: 'lambert',
+    light: { main: { intensity: 2 }, ambient: { intensity: 0.1 } },
+    viewControl: { autoRotate: true, autoRotateSpeed: 5 }
+  },
+  series: [{
+    type: 'lines3D',
+    coordinateSystem: 'globe',
+    effect: { show: true, trailWidth: 2, trailLength: 0.2, trailOpacity: 1, trailColor: 'rgba(255,255,255,0.5)' },
+    blendMode: 'lighter',
+    lineStyle: { width: 2, opacity: 0.8 },
+    data: seriesData
+  }]
+});
 </script>
 </body>
 </html>
