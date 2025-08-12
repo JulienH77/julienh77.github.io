@@ -17,28 +17,16 @@
     width: 100%;
     height: 100%;
   }
-  #legendToggle {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: rgba(255,255,255,0.7);
-    border: none;
-    padding: 6px 12px;
-    cursor: pointer;
-    font-weight: bold;
-    z-index: 1100;
-    border-radius: 4px;
-  }
   #legend {
     position: absolute;
-    top: 50px;
+    top: 10px;
     left: 10px;
     background: rgba(255,255,255,0.8);
     border-radius: 6px;
     padding: 10px 15px;
     font-family: Arial, sans-serif;
     font-size: 14px;
-    display: none;
+    display: block;  /* Toujours visible */
     z-index: 1100;
     user-select: none;
   }
@@ -98,7 +86,6 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
 </head>
 <body>
-<button id="legendToggle">Afficher la légende</button>
 <div id="legend">
   <label><input type="checkbox" id="toggleCountries" /> Limites des pays</label>
   <label><input type="checkbox" id="toggleCapitals" /> Capitales</label>
@@ -118,7 +105,6 @@
 (async function(){
   const earthTextureDay = './earth.jpg';
   const earthTextureNight = './earth_night_yellow.jpg';
-  const cloudTexture = './clouds.png';
   const moonTexture = './moon-base.jpg';
   const moonBumpTexture = './moon-bump.jpg';
 
@@ -195,7 +181,7 @@
     }
   });
 
-  // Variables de visibilité des couches, initialement false (donc non affiché)
+  // Variables de visibilité des couches, initialement false
   let showCountries = false;
   let showCapitals = false;
   let showTrajets = false;
@@ -215,10 +201,9 @@
         distance: 150,
         minDistance: 100,
         maxDistance: 300,
-        // Pas de zoom forcé sur l'Europe après démarrage
-        center: [10, 50]
+        center: [10, 50],
+        zoom: 100
       },
-      // Pas de nuages du tout
       layers: []
     },
     backgroundColor: 'black',
@@ -259,10 +244,10 @@
     const night = document.getElementById('dayNightSwitch').checked;
     option.globe.baseTexture = night ? earthTextureNight : earthTextureDay;
     option.backgroundColor = night ? '#222200' : 'black';
-    option.globe.layers = night ? [] : [];
+    option.globe.layers = [];
 
-    // Séries à afficher
-    option.series = option.series.filter(s => s.name === 'Lune'); // garder lune
+    // Séries à afficher, garder lune
+    option.series = option.series.filter(s => s.name === 'Lune');
 
     if(showCountries) {
       option.series.push({
@@ -301,12 +286,11 @@
     chart.setOption(option);
   }
 
-  // Gestion des checkbox (aucune cochée au départ)
+  // Events checkbox
   document.getElementById('toggleCountries').checked = false;
   document.getElementById('toggleCapitals').checked = false;
   document.getElementById('toggleTrajets').checked = false;
 
-  // Event listeners
   document.getElementById('toggleCountries').addEventListener('change', e => {
     showCountries = e.target.checked;
     updateGlobe();
@@ -320,25 +304,16 @@
     updateGlobe();
   });
 
-  // Bouton toggle légende
-  const legend = document.getElementById('legend');
-  document.getElementById('legendToggle').addEventListener('click', () => {
-    if(legend.style.display === 'none' || legend.style.display === '') {
-      legend.style.display = 'block';
-    } else {
-      legend.style.display = 'none';
-    }
-  });
-
-  // Bouton jour/nuit
+  // Jour / nuit
+  document.getElementById('dayNightSwitch').checked = false; // jour au départ
   document.getElementById('dayNightSwitch').addEventListener('change', () => {
     updateGlobe();
   });
 
-  // Au chargement : rien dans la légende affiché, globe au jour avec earth.jpg, zoom fixe sur Europe sans zoom forcé
+  // Vue initiale fixe sur Europe, sans zoom forcé au changement
   chart.getModel().getComponent('globe').setViewControl({
     autoRotate: true,
-    autoRotateSpeed: 1,
+    autoRotateSpeed: 0.5,
     distance: 150,
     minDistance: 100,
     maxDistance: 300,
@@ -346,8 +321,7 @@
     zoom: 100
   });
 
-  // Pas de zoom forcé quand on clique sur les couches
-  // Rien à faire car updateGlobe ne modifie pas le centre ni zoom
+  // Pas de zoom forcé quand on clique sur la légende ou les couches
 })();
 </script>
 </body>
