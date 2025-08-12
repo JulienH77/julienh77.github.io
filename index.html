@@ -1,354 +1,114 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Globe + Dashboard — Prototype</title>
+<meta charset="UTF-8">
+<title>Globe 3D ECharts</title>
 <style>
-  :root{--bg:#071426;--panel:#081526;--muted:#9fb0c9;--accent:#06b6d4}
-  html,body{height:100%;margin:0;background:linear-gradient(180deg,#041026,#071426);color:#e6eef6;font-family:Inter,system-ui,Arial}
-  .app{display:flex;height:100vh;gap:12px;padding:12px}
-  .left{width:34%;min-width:300px;background:rgba(255,255,255,0.02);border-radius:12px;padding:16px;display:flex;flex-direction:column;box-shadow:0 8px 30px rgba(2,6,23,.6)}
-  .right{flex:1;border-radius:12px;overflow:hidden;position:relative}
-  h1{margin:0;font-size:18px}
-  .sub{color:var(--muted);font-size:13px;margin-bottom:12px}
-  .card{background:rgba(255,255,255,0.02);border-radius:10px;padding:12px;margin-bottom:12px}
-  #globeViz{width:100%;height:100%}
-  .routes-list{max-height:180px;overflow:auto}
-  .route-item{padding:8px;border-radius:8px;margin-bottom:8px;background:rgba(255,255,255,0.01);cursor:pointer}
-  .route-item.active{outline:2px solid rgba(6,182,212,0.18);background:linear-gradient(90deg, rgba(6,182,212,0.06), transparent)}
-  .city-modal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#021426;padding:16px;border-radius:12px;display:none;z-index:50;min-width:280px;max-width:80%}
-  .city-modal img{max-width:100%;border-radius:8px;margin-bottom:8px}
-  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-  .btn{display:inline-block;padding:8px 10px;border-radius:8px;background:linear-gradient(90deg,var(--accent),#60a5fa);color:#012;cursor:pointer;font-weight:600}
-  .small{font-size:13px;color:var(--muted)}
-  @media(max-width:900px){.left{display:none}.right{width:100%}}
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #000;
+    color: white;
+  }
+  #main {
+    width: 100%;
+    height: 100%;
+  }
 </style>
+<!-- ECharts + ECharts-GL -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
 </head>
 <body>
-  <div class="app">
-    <div class="left">
-      <div class="topbar">
-        <div>
-          <h1>Tableau de bord</h1>
-          <div class="sub">Clique sur une route ou une ville à droite.</div>
-        </div>
-        <div><button id="reloadBtn" class="btn">Recharger</button></div>
-      </div>
+<div id="main"></div>
 
-      <div class="card">
-        <strong>Trajets intégrés</strong>
-        <div class="routes-list" id="routesList">Chargement...</div>
-      </div>
+<script>
+// Initialisation
+var chart = echarts.init(document.getElementById('main'));
 
-      <div class="card">
-        <strong>Statistiques</strong>
-        <div id="stats">
-          <div style="display:flex;justify-content:space-between;padding:8px 6px"><div>Distance</div><div id="stat-distance">—</div></div>
-          <div style="display:flex;justify-content:space-between;padding:8px 6px"><div>Durée (est.)</div><div id="stat-duration">—</div></div>
-          <div style="display:flex;justify-content:space-between;padding:8px 6px"><div>Transport</div><div id="stat-transport">—</div></div>
-          <div style="display:flex;justify-content:space-between;padding:8px 6px"><div>Vitesse</div><div id="stat-speed">—</div></div>
-        </div>
-      </div>
+// Villes spéciales
+const villesSpeciales = [
+    {name: "Munich", coord: [11.582, 48.135]},
+    {name: "Salzbourg", coord: [13.041, 47.809]},
+    {name: "Budapest", coord: [19.040, 47.497]},
+    {name: "Prague", coord: [14.437, 50.075]},
+    {name: "Ratisbonne", coord: [12.096, 49.019]},
+    {name: "Ulm", coord: [9.993, 48.401]},
+    {name: "Vienne", coord: [16.373, 48.208]}
+];
 
-      <div class="card">
-        <strong>Instructions</strong>
-        <div class="small">
-          • Remplace <code>trajetsData</code> dans le code par ton GeoJSON (FeatureCollection de LineString / MultiLineString).<br>
-          • Mets tes photos dans <code>images/</code> (ex: <code>images/munich1.jpg</code>).<br>
-          • Si ton poste bloque les CDN, demande-moi la version avec les bibliothèques collées inline.
-        </div>
-      </div>
-    </div>
+// Exemple de trajet (à remplacer par tes données)
+const trajets = [
+    {
+        coords: [
+            [11.582, 48.135], // Munich
+            [13.041, 47.809], // Salzbourg
+            [16.373, 48.208]  // Vienne
+        ],
+        color: 'red'
+    }
+];
 
-    <div class="right">
-      <div id="globeViz"></div>
-
-      <div class="city-modal" id="cityModal">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <strong id="cityTitle">Ville</strong>
-          <button id="closeModal" class="btn">Fermer</button>
-        </div>
-        <div id="cityPhotos"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- LIBRARIES (CDN) -->
-  <!-- Si ces CDN sont bloqués sur ton réseau, dis-le et je te fournis la version inline -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/build/three.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three@0.150.0/examples/js/controls/OrbitControls.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/three-globe@4.5.5/dist/three-globe.min.js"></script>
-
-  <script>
-  // ---------- helpers ----------
-  const toRad = d => d * Math.PI / 180;
-  function haversine(a, b) {
-    const R = 6371; // km
-    const dLat = toRad(b[1] - a[1]), dLon = toRad(b[0] - a[0]);
-    const lat1 = toRad(a[1]), lat2 = toRad(b[1]);
-    const sin = x => Math.sin(x / 2);
-    const aa = sin(dLat) * sin(dLat) + Math.cos(lat1) * Math.cos(lat2) * sin(dLon) * sin(dLon);
-    return 2 * R * Math.asin(Math.sqrt(aa));
-  }
-
-  // ---------- DONNÉES EXEMPLE intégrées (remplace par tes vraies) ----------
-  // Exemple simple : FeatureCollection de LineString — ajoute propriété "transport" dans properties
-  const trajetsData = {
-    "type": "FeatureCollection",
-    "features": [
-      {
-        "type": "Feature",
-        "properties": {"name":"Munich → Salzbourg → Vienne","transport":"voiture"},
-        "geometry": {"type":"LineString","coordinates":[[11.576124,48.137154],[13.043081,47.80949],[16.373819,48.208174]]}
-      },
-      {
-        "type":"Feature",
-        "properties":{"name":"Prague → Ratisbonne → Ulm","transport":"train"},
-        "geometry":{"type":"LineString","coordinates":[[14.4378,50.0755],[12.0970,49.0139],[9.9937,48.4011]]}
-      },
-      {
-        "type":"Feature",
-        "properties":{"name":"Budapest (petit circuit)","transport":"velo"},
-        "geometry":{"type":"LineString","coordinates":[[19.040236,47.497912],[19.05,47.49],[19.06,47.5]]}
-      }
+// Option du globe
+var option = {
+    backgroundColor: '#000',
+    globe: {
+        baseTexture: 'https://echarts.apache.org/examples/data-gl/asset/world.topo.bathy.200401.jpg',
+        heightTexture: 'https://echarts.apache.org/examples/data-gl/asset/bathymetry_bw_composite_4k.jpg',
+        shading: 'lambert',
+        environment: '#000',
+        viewControl: {
+            autoRotate: false,
+            targetCoord: [10, 50],
+            zoomSensitivity: 2
+        },
+        light: {
+            main: { intensity: 1.5 },
+            ambient: { intensity: 0.1 }
+        },
+        layers: [{
+            type: 'blend',
+            blendTo: 'emission',
+            texture: 'https://echarts.apache.org/examples/data-gl/asset/starfield.jpg'
+        }]
+    },
+    series: [
+        {
+            type: 'scatter3D',
+            coordinateSystem: 'globe',
+            symbol: 'circle',
+            symbolSize: 8,
+            itemStyle: { color: 'red' },
+            data: villesSpeciales.map(v => ({
+                name: v.name,
+                value: v.coord
+            }))
+        },
+        {
+            type: 'lines3D',
+            coordinateSystem: 'globe',
+            effect: {
+                show: true,
+                trailWidth: 4,
+                trailLength: 0.2,
+                trailOpacity: 1,
+                trailColor: 'rgba(255,255,255,0.5)'
+            },
+            lineStyle: {
+                width: 2,
+                opacity: 0.6
+            },
+            data: trajets.map(t => ({
+                coords: t.coords,
+                lineStyle: { color: t.color }
+            }))
+        }
     ]
-  };
+};
 
-  const villesData = [
-    {id:'munich', name:'Munich', coords:[11.576124,48.137154], photos:['images/munich1.jpg','images/munich2.jpg']},
-    {id:'salzburg', name:'Salzbourg', coords:[13.043081,47.80949], photos:['images/salzburg1.jpg']},
-    {id:'budapest', name:'Budapest', coords:[19.040236,47.497912], photos:['images/budapest1.jpg']},
-    {id:'prague', name:'Prague', coords:[14.4378,50.0755], photos:['images/prague1.jpg']},
-    {id:'regensburg', name:'Ratisbonne', coords:[12.0970,49.0139], photos:['images/regensburg1.jpg']},
-    {id:'ulm', name:'Ulm', coords:[9.9937,48.4011], photos:['images/ulm1.jpg']},
-    {id:'vienna', name:'Vienne', coords:[16.373819,48.208174], photos:['images/vienna1.jpg']}
-  ];
-
-  // ---------- SCENE & GLOBE ----------
-  let scene, renderer, camera, controls, Globe;
-  function initGlobe() {
-    // clear if exists
-    const el = document.getElementById('globeViz');
-    el.innerHTML = '';
-
-    scene = new THREE.Scene();
-    renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
-    renderer.setPixelRatio(window.devicePixelRatio);
-    renderer.setSize(el.clientWidth, el.clientHeight);
-    el.appendChild(renderer.domElement);
-
-    camera = new THREE.PerspectiveCamera(40, el.clientWidth / el.clientHeight, 0.1, 2000);
-    camera.position.z = 400;
-
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enablePan = false;
-    controls.minDistance = 101; controls.maxDistance = 1500;
-
-    Globe = new ThreeGlobe({animateIn:0})
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-night.jpg') // texture hosted; if blocked, globe still works but texture might not load
-      .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-      .showGraticules(true)
-      .polygonsTransitionDuration(300);
-
-    scene.add(Globe);
-
-    scene.add(new THREE.AmbientLight(0xbbbbbb));
-    const dir = new THREE.DirectionalLight(0xffffff, 0.6);
-    dir.position.set(1,1,1);
-    scene.add(dir);
-
-    window.addEventListener('resize', onResize);
-  }
-
-  function onResize(){
-    const el = document.getElementById('globeViz');
-    if(!renderer) return;
-    renderer.setSize(el.clientWidth, el.clientHeight);
-    camera.aspect = el.clientWidth / el.clientHeight;
-    camera.updateProjectionMatrix();
-  }
-
-  // Load polygon world data (topojson -> geojson)
-  async function loadCountries() {
-    try {
-      const topoResp = await fetch('https://unpkg.com/world-atlas@2/countries-110m.json');
-      const worldTopo = await topoResp.json();
-      const countries = topojson.feature(worldTopo, worldTopo.objects.countries);
-      Globe.polygonsData(countries.features)
-        .polygonCapColor(()=>'rgba(200,200,200,0.06)')
-        .polygonSideColor(()=>'rgba(30,30,30,0.15)')
-        .polygonLabel(({properties})=>properties && properties.name ? properties.name : '')
-        .onPolygonClick(p=>{
-          if(!p) return;
-          const cen = p.properties && p.properties.centroid;
-          // center on clicked country's centroid if available
-        });
-    } catch(e){
-      console.warn('Impossible de charger les polygones (topojson).', e);
-    }
-  }
-
-  // ---------- point + routes rendering ----------
-  function addCitiesToGlobe(){
-    const pts = villesData.map(c => ({...c, lat:c.coords[1], lng:c.coords[0], size:1}));
-    Globe.pointsData(pts)
-      .pointLat('lat')
-      .pointLng('lng')
-      .pointLabel(d => d.name)
-      .pointAltitude(0.01)
-      .pointRadius(0.8)
-      .pointsTransitionDuration(0);
-
-    Globe.onPointClick(city => {
-      const lat = city.lat, lng = city.lng;
-      Globe.pointOfView({lat, lng, altitude: 0.9}, 1000);
-      showCityModal(city);
-    });
-  }
-
-  const routesGroup = new THREE.Group();
-  function addRoutesFromGeoJSON(geo){
-    // clear existing
-    while(routesGroup.children.length) routesGroup.remove(routesGroup.children[0]);
-    scene.add(routesGroup);
-
-    const features = geo.type==='FeatureCollection' ? geo.features : (geo.type==='Feature' ? [geo] : []);
-    const listEl = document.getElementById('routesList'); listEl.innerHTML='';
-    const createdLines = [];
-
-    features.forEach((ft, idx) => {
-      const geom = ft.geometry; const props = ft.properties || {};
-      const pushLine = coords => {
-        const material = new THREE.LineBasicMaterial({linewidth:2});
-        const color = transportColor(props.transport);
-        material.color = new THREE.Color(color);
-        const positions = [];
-        coords.forEach(c => {
-          const v = latLonToVector3(c[1], c[0], 100);
-          positions.push(v.x, v.y, v.z);
-        });
-        const geom3 = new THREE.BufferGeometry();
-        geom3.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-        const line = new THREE.Line(geom3, material);
-        line.userData = {props, coords};
-        routesGroup.add(line);
-        createdLines.push(line);
-
-        // list entry
-        const item = document.createElement('div');
-        item.className = 'route-item';
-        item.innerHTML = `<strong>${props.name||('Trajet '+(createdLines.length))}</strong><div class="small">transport: ${props.transport||'—'}</div>`;
-        item.addEventListener('click', ()=> selectRoute(createdLines.indexOf(line), item));
-        listEl.appendChild(item);
-      };
-
-      if(geom.type === 'LineString') pushLine(geom.coordinates);
-      else if(geom.type === 'MultiLineString') geom.coordinates.forEach(ls => pushLine(ls));
-    });
-
-    if(listEl.children.length===0) listEl.innerHTML='Aucun trajet chargé.';
-  }
-
-  function transportColor(t){
-    if(!t) return '#aaaaaa';
-    t = (''+t).toLowerCase();
-    if(t.includes('train')) return '#f97316';
-    if(t.includes('voiture')||t.includes('car')||t.includes('auto')) return '#ef4444';
-    if(t.includes('velo')||t.includes('bike')) return '#10b981';
-    if(t.includes('avion')||t.includes('flight')||t.includes('plane')) return '#60a5fa';
-    return '#c084fc';
-  }
-
-  function latLonToVector3(lat, lon, radius){
-    const phi = (90 - lat) * Math.PI / 180;
-    const theta = (lon + 180) * Math.PI / 180;
-    return new THREE.Vector3(
-      - (radius) * Math.sin(phi) * Math.cos(theta),
-      (radius) * Math.cos(phi),
-      (radius) * Math.sin(phi) * Math.sin(theta)
-    );
-  }
-
-  function selectRoute(idx, itemEl){
-    const items = document.querySelectorAll('.route-item'); items.forEach(n=>n.classList.remove('active'));
-    if(itemEl) itemEl.classList.add('active');
-
-    const lines = routesGroup.children;
-    for(let i=0;i<lines.length;i++){
-      const line = lines[i];
-      line.material.opacity = i===idx ? 1.0 : 0.12;
-      // width tweak (note: linewidth not reliable across browsers)
-    }
-    const r = lines[idx];
-    if(!r) return;
-    const coords = r.userData.coords;
-    let dist = 0; for(let i=1;i<coords.length;i++) dist += haversine(coords[i-1], coords[i]);
-    const transport = r.userData.props.transport || '—';
-    const duration = Math.round(dist / 60 * 60); // fake assume 60km/h => minutes
-    const speed = (60).toFixed(0);
-    updateStats({distance:dist.toFixed(1)+' km', duration:duration+' min', transport, speed: speed+' km/h'});
-    const mid = coords[Math.floor(coords.length/2)];
-    Globe.pointOfView({lat: mid[1], lng: mid[0], altitude: 0.9}, 1000);
-  }
-
-  function updateStats(s){
-    document.getElementById('stat-distance').innerText = s? s.distance : '—';
-    document.getElementById('stat-duration').innerText = s? s.duration : '—';
-    document.getElementById('stat-transport').innerText = s? s.transport : '—';
-    document.getElementById('stat-speed').innerText = s? s.speed : '—';
-  }
-
-  // ---------- modal for city photos ----------
-  const cityModal = document.getElementById('cityModal');
-  const cityTitle = document.getElementById('cityTitle');
-  const cityPhotos = document.getElementById('cityPhotos');
-  document.getElementById('closeModal').addEventListener('click', ()=> cityModal.style.display='none');
-
-  function showCityModal(city){
-    cityTitle.innerText = city.name;
-    cityPhotos.innerHTML = '';
-    const cityData = villesData.find(c => c.name === city.name || c.id === city.id);
-    if(cityData && cityData.photos && cityData.photos.length){
-      cityData.photos.forEach(p => {
-        const img = document.createElement('img');
-        img.src = p;
-        img.alt = cityData.name;
-        img.onerror = ()=>{ img.style.display='none'; }
-        cityPhotos.appendChild(img);
-      });
-    } else {
-      cityPhotos.innerHTML = '<div class="small">Aucune photo trouvée pour cette ville. Mets des fichiers dans images/.</div>';
-    }
-    cityModal.style.display = 'block';
-  }
-
-  // ---------- animation loop ----------
-  function animate(){
-    requestAnimationFrame(animate);
-    if(Globe) Globe.rotation.y += 0.0006;
-    if(controls) controls.update();
-    if(renderer && camera) renderer.render(scene, camera);
-  }
-
-  // ---------- bootstrap ----------
-  async function bootstrap(){
-    initGlobe();
-    await loadCountries();
-    addCitiesToGlobe();
-    addRoutesFromGeoJSON(trajetsData);
-    animate();
-  }
-
-  // small retry if libraries blocked: try again after a short delay
-  document.getElementById('reloadBtn').addEventListener('click', ()=> {
-    try { bootstrap(); } catch(e){ console.warn(e); alert('Erreur au démarrage. Si les CDN sont bloqués, demande la version offline (inline).'); }
-  });
-
-  // kick
-  try { bootstrap(); } catch(e) { console.warn('Erreur bootstrap', e); setTimeout(()=>{ try{ bootstrap(); } catch(e2){ console.error(e2); alert('Impossible de démarrer le globe. Si ton poste bloque l\'accès aux CDN ou WebGL est désactivé, dis-moi et je fournirai une version entièrement inline.'); } }, 600); }
-
-  </script>
+// Appliquer l'option
+chart.setOption(option);
+</script>
 </body>
 </html>
