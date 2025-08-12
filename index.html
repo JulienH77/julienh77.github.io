@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<title>Globe avec pays, capitales, nuages et trajets</title>
+<title>Debug Globe avec GeoJSON</title>
 <style>
   html, body, #main {
     margin: 0; padding: 0; width: 100%; height: 100%;
@@ -17,7 +17,6 @@
   }
 </style>
 
-<!-- Scripts ECharts + ECharts-GL -->
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
 </head>
@@ -26,142 +25,105 @@
 
 <script>
 (async function(){
+  try {
+    const earthTexture = './earth.jpg';
+    const nightTexture = './night.jpg';
+    const cloudTexture = './clouds.png';
 
-  // Textures locales
-  const earthTexture = './earth.jpg';
-  const nightTexture = './night.jpg';
-  const cloudTexture = './clouds.png';
+    const chart = echarts.init(document.getElementById('main'));
 
-  const chart = echarts.init(document.getElementById('main'));
-
-  // Fonction pour charger un GeoJSON local
-  async function loadGeojson(url) {
-    const res = await fetch(url);
-    if(!res.ok) throw new Error("Erreur chargement " + url);
-    return await res.json();
-  }
-
-  // Chargement des GeoJSON
-  const countries = await loadGeojson('./countries_10m_new.geojson');
-  const capitals = await loadGeojson('./capitals.geojson');
-  const trajets = await loadGeojson('./ALLLINE_TRAJET_wgs.geojson');
-
-  // Construction des lignes des pays
-  const countryLines = [];
-  countries.features.forEach(feature => {
-    const coords = [];
-    if(feature.geometry.type === 'MultiPolygon') {
-      feature.geometry.coordinates.forEach(polygon => {
-        polygon.forEach(ring => {
-          coords.push(ring.map(c => [c[0], c[1]]));
-        });
-      });
-    } else if(feature.geometry.type === 'Polygon') {
-      feature.geometry.coordinates.forEach(ring => {
-        coords.push(ring.map(c => [c[0], c[1]]));
-      });
+    async function loadGeojson(url) {
+      console.log("Chargement de ", url);
+      const res = await fetch(url);
+      if(!res.ok) throw new Error("Erreur chargement " + url + " code: " + res.status);
+      const json = await res.json();
+      console.log("Données chargées depuis", url, json);
+      return json;
     }
-    coords.forEach(line => {
-      countryLines.push({
-        coords: line,
-        lineStyle: { color: '#ff0000', width: 0.5 }
-      });
-    });
-  });
 
-  // Capitales en points
-  const capitalPoints = capitals.features.map(f => ({
-    name: f.properties.name || '',
-    value: [f.geometry.coordinates[0], f.geometry.coordinates[1], 0],
-    symbolSize: 4,
-    itemStyle: { color: 'white' }
-  }));
+    const countries = await loadGeojson('./countries_10m_new.geojson');
+    const trajets = await loadGeojson('./ALLLINE_TRAJET_wgs.geojson');
 
-  // Mapping couleur selon le champ "trajet"
-  const couleurParTrajet = {
-    "trajet1": "#1f77b4",
-    "trajet2": "#ff7f0e",
-    "trajet3": "#2ca02c",
-    "trajet4": "#d62728",
-  };
-
-  // Préparation des trajets, gestion MultiLineString et LineString
-  const trajetLines = [];
-
-  trajets.features.forEach(f => {
-    const type = f.geometry.type;
-    const trajetType = f.properties.trajet || "default";
-    const color = couleurParTrajet[trajetType] || '#ffffff';
-
-    if(type === 'LineString') {
-      trajetLines.push({
-        coords: f.geometry.coordinates.map(c => [c[0], c[1]]),
-        lineStyle: { color: color, width: 2, opacity: 0.9 }
-      });
-    } else if(type === 'MultiLineString') {
-      f.geometry.coordinates.forEach(line => {
-        trajetLines.push({
-          coords: line.map(c => [c[0], c[1]]),
-          lineStyle: { color: color, width: 2, opacity: 0.9 }
+    // Construction des lignes des pays
+    const countryLines = [];
+    countries.features.forEach(feature => {
+      if(!feature.geometry) return;
+      if(feature.geometry.type === 'MultiPolygon') {
+        feature.geometry.coordinates.forEach(polygon => {
+          polygon.forEach(ring => {
+            countryLines.push({ coords: ring.map(c => [c[0], c[1]]), lineStyle: { color: '#ff0000', width: 0.5 } });
+          });
         });
-      });
-    }
-  });
-
-  chart.setOption({
-    backgroundColor: 'transparent',
-    globe: {
-      baseTexture: earthTexture,
-      nightTexture: nightTexture,
-      shading: 'lambert',
-      postEffect: { enable: true },
-      light: {
-        main: { intensity: 1, shadow: true, shadowQuality: 'high' },
-        ambient: { intensity: 0.1 }
-      },
-      viewControl: { autoRotate: true, autoRotateSpeed: 3 },
-      layers: [{
-        type: 'overlay',
-        texture: cloudTexture,
-        shading: 'lambert',
-        distance: 2.0,
-        blendTo: 'emission'
-      }]
-    },
-    series: [
-      {
-        name: 'Pays',
-        type: 'lines3D',
-        coordinateSystem: 'globe',
-        blendMode: 'lighter',
-        lineStyle: { width: 0.5, opacity: 0.8 },
-        data: countryLines
-      },
-      {
-        name: 'Capitales',
-        type: 'scatter3D',
-        coordinateSystem: 'globe',
-        symbol: 'circle',
-        symbolSize: 4,
-        itemStyle: {
-          color: 'white',
-          opacity: 1,
-          borderWidth: 0.2,
-          borderColor: 'black'
-        },
-        data: capitalPoints
-      },
-      {
-        name: 'Trajets',
-        type: 'lines3D',
-        coordinateSystem: 'globe',
-        blendMode: 'lighter',
-        lineStyle: { width: 2, opacity: 0.9 },
-        data: trajetLines
+      } else if(feature.geometry.type === 'Polygon') {
+        feature.geometry.coordinates.forEach(ring => {
+          countryLines.push({ coords: ring.map(c => [c[0], c[1]]), lineStyle: { color: '#ff0000', width: 0.5 } });
+        });
       }
-    ]
-  });
+    });
 
+    // Préparation des trajets
+    const couleurParTrajet = {
+      "trajet1": "#1f77b4",
+      "trajet2": "#ff7f0e",
+      "trajet3": "#2ca02c",
+      "trajet4": "#d62728",
+    };
+    const trajetLines = [];
+
+    trajets.features.forEach(f => {
+      if(!f.geometry) return;
+      const type = f.geometry.type;
+      const trajetType = f.properties?.trajet || "default";
+      const color = couleurParTrajet[trajetType] || '#ffffff';
+
+      if(type === 'LineString') {
+        trajetLines.push({ coords: f.geometry.coordinates.map(c => [c[0], c[1]]), lineStyle: { color: color, width: 2, opacity: 0.9 } });
+      } else if(type === 'MultiLineString') {
+        f.geometry.coordinates.forEach(line => {
+          trajetLines.push({ coords: line.map(c => [c[0], c[1]]), lineStyle: { color: color, width: 2, opacity: 0.9 } });
+        });
+      } else {
+        console.warn("Type géométrique inconnu pour trajet:", type);
+      }
+    });
+
+    console.log("Country lines count:", countryLines.length);
+    console.log("Trajet lines count:", trajetLines.length);
+
+    chart.setOption({
+      backgroundColor: 'transparent',
+      globe: {
+        baseTexture: earthTexture,
+        nightTexture: nightTexture,
+        shading: 'lambert',
+        postEffect: { enable: true },
+        light: { main: { intensity: 1, shadow: true, shadowQuality: 'high' }, ambient: { intensity: 0.1 } },
+        viewControl: { autoRotate: true, autoRotateSpeed: 3 },
+        layers: [{ type: 'overlay', texture: cloudTexture, shading: 'lambert', distance: 2.0, blendTo: 'emission' }]
+      },
+      series: [
+        {
+          name: 'Pays',
+          type: 'lines3D',
+          coordinateSystem: 'globe',
+          blendMode: 'lighter',
+          lineStyle: { width: 0.5, opacity: 0.8 },
+          data: countryLines
+        },
+        {
+          name: 'Trajets',
+          type: 'lines3D',
+          coordinateSystem: 'globe',
+          blendMode: 'lighter',
+          lineStyle: { width: 2, opacity: 0.9 },
+          data: trajetLines
+        }
+      ]
+    });
+  }
+  catch(e) {
+    console.error("Erreur dans le script:", e);
+  }
 })();
 </script>
 </body>
