@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
-<title>Globe avec pays, capitales et nuages</title>
+<title>Globe avec pays, capitales, nuages et trajets</title>
 <style>
   html, body, #main {
     margin: 0; padding: 0; width: 100%; height: 100%;
@@ -27,31 +27,29 @@
 <script>
 (async function(){
 
-  // Textures base64 ou url locales
+  // Textures locales
   const earthTexture = './earth.jpg';
   const nightTexture = './night.jpg';
   const cloudTexture = './clouds.png';
 
   const chart = echarts.init(document.getElementById('main'));
 
-  // Charger GeoJSON en local
+  // Fonction pour charger un GeoJSON local
   async function loadGeojson(url) {
     const res = await fetch(url);
     if(!res.ok) throw new Error("Erreur chargement " + url);
     return await res.json();
   }
 
-  // Load geojson
+  // Chargement des GeoJSON
   const countries = await loadGeojson('./countries_10m_new.geojson');
   const capitals = await loadGeojson('./capitals.geojson');
+  const trajets = await loadGeojson('./ALLLINE_TRAJET_wgs.geojson');
 
-  // Transforme les frontières en séries 'lines3D' pour le globe
+  // Construction des lignes des pays
   const countryLines = [];
-
   countries.features.forEach(feature => {
     const coords = [];
-
-    // MultiPolygon ou Polygon ?
     if(feature.geometry.type === 'MultiPolygon') {
       feature.geometry.coordinates.forEach(polygon => {
         polygon.forEach(ring => {
@@ -63,7 +61,6 @@
         coords.push(ring.map(c => [c[0], c[1]]));
       });
     }
-
     coords.forEach(line => {
       countryLines.push({
         coords: line,
@@ -80,8 +77,33 @@
     itemStyle: { color: 'yellow' }
   }));
 
+  // Définir un mapping couleur en fonction du champ "trajet"
+  // Modifie ici pour correspondre à tes valeurs possibles et leurs couleurs
+  const couleurParTrajet = {
+    "trajet1": "#1f77b4",
+    "trajet2": "#ff7f0e",
+    "trajet3": "#2ca02c",
+    "trajet4": "#d62728",
+    // ajoute autant que tu veux
+  };
+
+  // Préparer les trajets en lignes3D avec couleurs selon "trajet"
+  const trajetLines = trajets.features.map(f => {
+    const coords = f.geometry.coordinates;  // suppose LineString
+    const trajetType = f.properties.trajet || "default";
+
+    return {
+      coords: coords.map(c => [c[0], c[1]]),
+      lineStyle: {
+        color: couleurParTrajet[trajetType] || '#ffffff',
+        width: 2,
+        opacity: 0.9
+      }
+    };
+  });
+
   chart.setOption({
-    backgroundColor: 'transparent', // car le body a le background
+    backgroundColor: 'transparent',
     globe: {
       baseTexture: earthTexture,
       nightTexture: nightTexture,
@@ -122,6 +144,14 @@
           borderColor: 'black'
         },
         data: capitalPoints
+      },
+      {
+        name: 'Trajets',
+        type: 'lines3D',
+        coordinateSystem: 'globe',
+        blendMode: 'lighter',
+        lineStyle: { width: 2, opacity: 0.9 },
+        data: trajetLines
       }
     ]
   });
