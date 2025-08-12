@@ -105,12 +105,12 @@ const seriesData = trajets.features.map(f => ({
 // Initialiser le globe
 const chart = echarts.init(document.getElementById('main'));
 chart.setOption({
-  backgroundColor: '#b5b5b5',
+  backgroundColor: '#000',
   globe: {
     baseTexture: earthTexture,
     heightTexture: nightTexture,
     shading: 'lambert',
-    light: { main: { intensity: 2 }, ambient: { intensity: 0.1 } },
+    light: { main: { intensity: 1 }, ambient: { intensity: 0.1 } },
     viewControl: { autoRotate: true, autoRotateSpeed: 5 }
   },
   series: [{
