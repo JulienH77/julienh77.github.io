@@ -201,7 +201,7 @@
   // trajets -> LineString/MultiLineString (ou polygons éventuels)
   const trajetLines = [];
   const defaultColor = '#00ffff';
-  const mapColor = { avion:'#e11d48', train:'#06b6d4', bus:'#f97316', velo:'#10b981' };
+  const mapColor = { avion:'#0da2ff', train:'#ee0020', bus:'#009c27', voiture:'#900dff' };
   (trajetsGeo.features || []).forEach(f => {
     const key = (f.properties?.trajet || f.properties?.transport || '').toLowerCase();
     const col = mapColor[key] || defaultColor;
@@ -233,7 +233,7 @@
         coordinateSystem:'globe',
         polyline:true,
         data: countryLines,
-        lineStyle:{ color:'#a020f0', width:1.2, opacity:0.98 }
+        lineStyle:{ color:'#f0f0f0', width:1.2, opacity:0.98 }
       });
     }
     if(showTrajets){
@@ -260,7 +260,7 @@
           distance: 2,
           textStyle:{ fontSize: 10, color:'#fff', backgroundColor:'rgba(0,0,0,0.35)', padding:[2,4], borderRadius:3 }
         },
-        itemStyle:{ color:'#ffffff', borderColor:'#000', borderWidth:0.8 },
+        itemStyle:{ color:'#ffffff', borderColor:'#000', borderWidth:0.6 },
         data: capitalPoints
       });
     }
