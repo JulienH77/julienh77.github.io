@@ -44,10 +44,6 @@
     width:140px; height:140px; z-index:110; border-radius:50%;
     overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.6); background:black;
   }
-  #helper {
-    position:absolute; left:14px; bottom:14px; z-index:120;
-    color:white; font-size:12px;
-  }
   .echarts-for-globe { position: absolute; left:0; top:0; width:100%; height:100%; z-index:1; }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
@@ -67,7 +63,6 @@
       <label><input id="chkCapitales" type="checkbox"> Capitales</label>
     </div>
     <div id="moonPreview"></div>
-    <div id="helper">Zoom pour afficher les capitales</div>
   </div>
 
 <script>
@@ -99,9 +94,9 @@
   function polygonToLines(geom){
     const out = [];
     if(geom.type === 'Polygon'){
-      geom.coordinates.forEach(ring=> out.push(ring));
+      geom.coordinates.forEach(ring=> out.push(ring.map(c=>fixCoords(c))));
     } else if(geom.type === 'MultiPolygon'){
-      geom.coordinates.forEach(poly=> poly.forEach(ring=> out.push(ring)));
+      geom.coordinates.forEach(poly=> poly.forEach(ring=> out.push(ring.map(c=>fixCoords(c)))));
     }
     return out;
   }
@@ -109,13 +104,20 @@
     const out = [];
     const geom = feature.geometry;
     if(geom.type === 'LineString'){
-      out.push(geom.coordinates);
+      out.push(geom.coordinates.map(c=>fixCoords(c)));
     } else if(geom.type === 'MultiLineString'){
-      geom.coordinates.forEach(line => out.push(line));
+      geom.coordinates.forEach(line => out.push(line.map(c=>fixCoords(c))));
     } else if(geom.type === 'Polygon' || geom.type === 'MultiPolygon'){
       polygonToLines(geom).forEach(l=>out.push(l));
     }
     return out;
+  }
+  function fixCoords(coord){
+    // Si coord[0] est en dehors de -180..180 et coord[1] dedans → inversion
+    if(Math.abs(coord[0]) <= 90 && Math.abs(coord[1]) <= 180){
+      return [coord[1], coord[0]];
+    }
+    return coord;
   }
 
   let dayTexture = PATH_EARTH_DAY;
@@ -133,9 +135,7 @@
 
   const countryLines = [];
   (countriesGeo.features || []).forEach(f => {
-    polygonToLines(f.geometry).forEach(line => {
-      countryLines.push({ coords: line });
-    });
+    polygonToLines(f.geometry).forEach(line => countryLines.push({ coords: line }));
   });
 
   const trajetLines = [];
@@ -148,15 +148,14 @@
   });
 
   const capitalPoints = (capitalsGeo.features || []).map(f => ({
-    name: f.properties?.name || f.properties?.NAME || '',
-    value: [f.geometry.coordinates[0], f.geometry.coordinates[1], 0]
+    name: f.properties?.city || f.properties?.name || f.properties?.NAME || '',
+    value: fixCoords([f.geometry.coordinates[0], f.geometry.coordinates[1]]).concat([0.5])
   }));
 
   const globeChart = echarts.init(document.getElementById('globeContainer'), null, { renderer:'webgl' });
   const moonChart = echarts.init(document.getElementById('moonPreview'), null, { renderer:'webgl' });
 
   function makeOption({ showPays=false, showTrajets=false, showCapitales=false, isNight=false }) {
-    const baseTexture = showPays ? null : (isNight ? nightTexture : dayTexture);
     const series = [];
     if(showPays) {
       series.push({
@@ -183,6 +182,13 @@
         coordinateSystem:'globe',
         symbol:'circle',
         symbolSize:6,
+        label: {
+          show: true,
+          formatter: '{b}',
+          position: 'top',
+          fontSize: 10,
+          color: '#fff'
+        },
         itemStyle:{ color:'#fff', borderColor:'#000', borderWidth:0.8 },
         data: capitalPoints
       });
@@ -190,7 +196,7 @@
     return {
       backgroundColor: 'transparent',
       globe: {
-        baseTexture: baseTexture || undefined,
+        baseTexture: isNight ? nightTexture : dayTexture,
         shading: 'lambert',
         environment: '#000000',
         light: { main:{ intensity:1.1 }, ambient:{ intensity:0.3 } },
@@ -219,7 +225,7 @@
         shading: 'lambert',
         environment: '#000',
         light: { main:{ intensity:0.7 }, ambient:{ intensity:0.3 } },
-        viewControl: { autoRotate:true, autoRotateSpeed:1.8, distance:90 }
+        viewControl: { autoRotate:true, autoRotateSpeed:1.8, distance:130 }
       },
       series: []
     });
