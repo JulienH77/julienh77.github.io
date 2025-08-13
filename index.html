@@ -69,6 +69,7 @@
 (async function(){
   const PATH_EARTH_DAY = './earth.jpg';
   const PATH_EARTH_NIGHT_RAW = './night.jpg';
+  const PATH_STARFIELD = './starfield.jpg'; // utilisé comme environment du globe
   const PATH_MOON_BASE = './moon-base.jpg';
   const PATH_MOON_BUMP = './moon-bump.jpg';
   const PATH_COUNTRIES = './countries_10m_new.geojson';
@@ -77,7 +78,7 @@
 
   const AUTO_ROTATE_SPEED = 0.6;
 
-  function loadJSON(url){ return fetch(url).then(r=>r.json()); }
+  function loadJSON(url){ return fetch(url).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status+' '+url); return r.json(); }); }
   function loadImage(url){
     return new Promise((res, rej) => {
       const img = new Image(); img.crossOrigin = 'anonymous';
@@ -85,48 +86,49 @@
     });
   }
   function tintToYellow(img, intensity=0.6){
-    const c = document.createElement('canvas'); c.width=img.width; c.height=img.height;
+    const c = document.createElement('canvas'); c.width=img.naturalWidth||img.width; c.height=img.naturalHeight||img.height;
     const ctx = c.getContext('2d');
-    ctx.drawImage(img,0,0); ctx.globalCompositeOperation = 'multiply';
-    ctx.fillStyle = `rgba(241,213,109,${intensity})`; ctx.fillRect(0,0,img.width,img.height);
+    ctx.drawImage(img,0,0,c.width,c.height); ctx.globalCompositeOperation = 'multiply';
+    ctx.fillStyle = `rgba(241,213,109,${intensity})`; ctx.fillRect(0,0,c.width,c.height);
     return c.toDataURL('image/jpeg', 0.9);
+  }
+
+  // --- géométrie & robustesse lat/lon ---
+  function fixCoords(coord){
+    // Si coord ressemble à [lat, lon] (|x|<=90 et |y|<=180), on inverse
+    if(Math.abs(coord[0]) <= 90 && Math.abs(coord[1]) <= 180){ return [coord[1], coord[0]]; }
+    return coord;
   }
   function polygonToLines(geom){
     const out = [];
+    if(!geom) return out;
     if(geom.type === 'Polygon'){
-      geom.coordinates.forEach(ring=> out.push(ring.map(c=>fixCoords(c))));
+      geom.coordinates.forEach(ring=> out.push(ring.map(fixCoords)));
     } else if(geom.type === 'MultiPolygon'){
-      geom.coordinates.forEach(poly=> poly.forEach(ring=> out.push(ring.map(c=>fixCoords(c)))));
+      geom.coordinates.forEach(poly=> poly.forEach(ring=> out.push(ring.map(fixCoords))));
     }
     return out;
   }
   function extractLinesFromFeature(feature){
     const out = [];
-    const geom = feature.geometry;
-    if(geom.type === 'LineString'){
-      out.push(geom.coordinates.map(c=>fixCoords(c)));
-    } else if(geom.type === 'MultiLineString'){
-      geom.coordinates.forEach(line => out.push(line.map(c=>fixCoords(c))));
-    } else if(geom.type === 'Polygon' || geom.type === 'MultiPolygon'){
-      polygonToLines(geom).forEach(l=>out.push(l));
+    const g = feature && feature.geometry;
+    if(!g) return out;
+    if(g.type === 'LineString'){
+      out.push(g.coordinates.map(fixCoords));
+    } else if(g.type === 'MultiLineString'){
+      g.coordinates.forEach(line => out.push(line.map(fixCoords)));
+    } else if(g.type === 'Polygon' || g.type === 'MultiPolygon'){
+      polygonToLines(g).forEach(l=>out.push(l));
     }
     return out;
   }
-  function fixCoords(coord){
-    // Si coord[0] est en dehors de -180..180 et coord[1] dedans → inversion
-    if(Math.abs(coord[0]) <= 90 && Math.abs(coord[1]) <= 180){
-      return [coord[1], coord[0]];
-    }
-    return coord;
-  }
 
+  // --- textures ---
   let dayTexture = PATH_EARTH_DAY;
   let nightTexture = PATH_EARTH_NIGHT_RAW;
-  try {
-    const nightImg = await loadImage(PATH_EARTH_NIGHT_RAW);
-    nightTexture = tintToYellow(nightImg, 0.6);
-  } catch(e){ nightTexture = PATH_EARTH_NIGHT_RAW; }
+  try { const nightImg = await loadImage(PATH_EARTH_NIGHT_RAW); nightTexture = tintToYellow(nightImg, 0.6); } catch(e){}
 
+  // --- données ---
   let [countriesGeo, trajetsGeo, capitalsGeo] = await Promise.all([
     loadJSON(PATH_COUNTRIES),
     loadJSON(PATH_TRAJETS),
@@ -134,48 +136,52 @@
   ]);
 
   const countryLines = [];
-  (countriesGeo.features || []).forEach(f => {
-    polygonToLines(f.geometry).forEach(line => countryLines.push({ coords: line }));
-  });
+  (countriesGeo.features || []).forEach(f => { polygonToLines(f.geometry).forEach(line => countryLines.push({ coords: line })); });
 
   const trajetLines = [];
-  const mapColor = { 'avion':'#e11d48', 'train':'#06b6d4', 'bus':'#f97316', 'velo':'#10b981' };
+  const mapColor = { avion:'#e11d48', train:'#06b6d4', bus:'#f97316', velo:'#10b981' };
   (trajetsGeo.features || []).forEach(f => {
-    const col = mapColor[(f.properties?.trajet || f.properties?.transport || '').toLowerCase()] || '#00ffff';
-    extractLinesFromFeature(f).forEach(line => {
-      trajetLines.push({ coords: line, lineStyle:{ color:col, width:3, opacity:1 }});
-    });
+    const key = (f.properties?.trajet || f.properties?.transport || '').toLowerCase();
+    const col = mapColor[key] || '#00ffff';
+    extractLinesFromFeature(f).forEach(line => trajetLines.push({ coords: line, lineStyle:{ color:col, width:3.5, opacity:1 }}));
   });
 
-  const capitalPoints = (capitalsGeo.features || []).map(f => ({
-    name: f.properties?.city || f.properties?.name || f.properties?.NAME || '',
-    value: fixCoords([f.geometry.coordinates[0], f.geometry.coordinates[1]]).concat([0.5])
-  }));
+  const capitalPoints = (capitalsGeo.features || []).map(f => {
+    const lonlat = fixCoords([f.geometry.coordinates[0], f.geometry.coordinates[1]]);
+    return {
+      name: f.properties?.city || f.properties?.name || f.properties?.NAME || '',
+      value: [lonlat[0], lonlat[1], 0] // COLLE À LA SURFACE
+    };
+  });
 
+  // --- charts ---
   const globeChart = echarts.init(document.getElementById('globeContainer'), null, { renderer:'webgl' });
-  const moonChart = echarts.init(document.getElementById('moonPreview'), null, { renderer:'webgl' });
+  const moonChart  = echarts.init(document.getElementById('moonPreview'),  null, { renderer:'webgl' });
 
   function makeOption({ showPays=false, showTrajets=false, showCapitales=false, isNight=false }) {
     const series = [];
-    if(showPays) {
+    if(showPays){
       series.push({
         name:'Pays',
         type:'lines3D',
         coordinateSystem:'globe',
-        lineStyle:{ color:'#a020f0', width:1, opacity:1 },
+        polyline: true,
+        lineStyle:{ color:'#a020f0', width:1.2, opacity:0.95 },
         data: countryLines
       });
     }
-    if(showTrajets) {
+    if(showTrajets){
       series.push({
         name:'Trajets',
         type:'lines3D',
         coordinateSystem:'globe',
+        polyline: true,
         blendMode:'lighter',
+        lineStyle:{ width:3.5 },
         data: trajetLines
       });
     }
-    if(showCapitales) {
+    if(showCapitales){
       series.push({
         name:'Capitales',
         type:'scatter3D',
@@ -186,10 +192,9 @@
           show: true,
           formatter: '{b}',
           position: 'top',
-          fontSize: 10,
-          color: '#fff'
+          textStyle:{ fontSize: 10, color: '#fff', backgroundColor:'rgba(0,0,0,0.35)', padding: [2,4], borderRadius:3 }
         },
-        itemStyle:{ color:'#fff', borderColor:'#000', borderWidth:0.8 },
+        itemStyle:{ color:'#ffffff', borderColor:'#000', borderWidth:0.8 },
         data: capitalPoints
       });
     }
@@ -198,8 +203,9 @@
       globe: {
         baseTexture: isNight ? nightTexture : dayTexture,
         shading: 'lambert',
-        environment: '#000000',
-        light: { main:{ intensity:1.1 }, ambient:{ intensity:0.3 } },
+        // 🔭 environment = starfield => le fond ne disparaît plus
+        environment: PATH_STARFIELD,
+        light: { main:{ intensity:1.0 }, ambient:{ intensity:0.35 } },
         viewControl: {
           autoRotate: true,
           autoRotateSpeed: AUTO_ROTATE_SPEED,
@@ -216,6 +222,7 @@
   let state = { showPays:false, showTrajets:false, showCapitales:false, isNight:false };
   globeChart.setOption(makeOption(state));
 
+  // 🌙 Lune : bien dézoommée
   try {
     moonChart.setOption({
       backgroundColor: 'transparent',
@@ -223,14 +230,15 @@
         baseTexture: PATH_MOON_BASE,
         heightTexture: PATH_MOON_BUMP,
         shading: 'lambert',
-        environment: '#000',
-        light: { main:{ intensity:0.7 }, ambient:{ intensity:0.3 } },
-        viewControl: { autoRotate:true, autoRotateSpeed:1.8, distance:150 }
+        environment: PATH_STARFIELD,
+        light: { main:{ intensity:0.6 }, ambient:{ intensity:0.25 } },
+        viewControl: { autoRotate:true, autoRotateSpeed:1.6, distance:200 }
       },
       series: []
     });
   } catch(e) {}
 
+  // --- UI ---
   const toggleEl = document.getElementById('toggle');
   const chkPays = document.getElementById('chkPays');
   const chkTrajets = document.getElementById('chkTrajets');
@@ -241,7 +249,7 @@
     state.showTrajets = chkTrajets.checked;
     state.showCapitales = chkCapitales.checked;
     state.isNight = toggleEl.classList.contains('night');
-    globeChart.setOption(makeOption(state));
+    globeChart.setOption(makeOption(state), { notMerge: true });
   }
 
   toggleEl.addEventListener('click', ()=>{
@@ -251,6 +259,9 @@
   chkPays.addEventListener('change', refreshFromUI);
   chkTrajets.addEventListener('change', refreshFromUI);
   chkCapitales.addEventListener('change', refreshFromUI);
+
+  // logs utiles
+  console.log('countries:', countryLines.length, 'trajets:', trajetLines.length, 'capitales:', capitalPoints.length);
 })();
 </script>
 </body>
