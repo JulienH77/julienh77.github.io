@@ -116,7 +116,7 @@
     const ctx = c.getContext('2d');
     ctx.drawImage(img,0,0,w,h);
     ctx.globalCompositeOperation = 'multiply';
-    ctx.fillStyle = `rgba(241,213,109,${intensity})`;
+    ctx.fillStyle = rgba(241,213,109,${intensity});
     ctx.fillRect(0,0,w,h);
     return c.toDataURL('image/jpeg', 0.9);
   }
