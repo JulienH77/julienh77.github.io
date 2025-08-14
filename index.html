@@ -161,9 +161,13 @@
 
   <div id="legend" role="group" aria-label="Contrôles des couches">
     <label><input id="chkPays" type="checkbox"> Limites (Pays)</label>
-    <label><input id="chkTrajets" type="checkbox"> Trajets</label>
+    <label id="trajetsLabel">
+      <input id="chkTrajets" type="checkbox"> Trajets
+      <button type="button" id="expandTrajets" aria-label="Voir détails">▼</button>
+    </label>
+    <div id="trajetList" style="margin-left:20px; display:none;"></div>
+
     <label><input id="chkCapitales" type="checkbox"> Capitales</label>
-    <!-- (Nuages retiré de la légende, désormais un bouton à gauche) -->
   </div>
 
   <div id="moonPreview" title="Aperçu Lune"></div>
@@ -233,6 +237,38 @@
     const col = mapColor[(f.properties?.trajet || f.properties?.transport || '').toLowerCase()] || '#00ffff';
     extractLinesFromFeature(f).forEach(l => trajetLines.push({ ...l, lineStyle:{ color: col, width: 3, opacity: 0.95 }, properties:f.properties }));
   });
+// Liste unique des noms de trajets
+const trajetNames = [...new Set(
+  trajetLines.map(t => t.properties?.nom || t.properties?.trajet || 'Sans nom')
+)];
+
+// État : trajets visibles
+state.visibleTrajets = new Set(trajetNames);
+
+// Construction de la sous-liste dans la légende
+const trajetListEl = document.getElementById('trajetList');
+trajetNames.forEach(name => {
+  const id = 'trajet_' + name.replace(/\s+/g, '_');
+  const div = document.createElement('div');
+  div.innerHTML = `<label><input type="checkbox" id="${id}" checked> ${name}</label>`;
+  trajetListEl.appendChild(div);
+  document.getElementById(id).addEventListener('change', e => {
+    if (e.target.checked) {
+      state.visibleTrajets.add(name);
+    } else {
+      state.visibleTrajets.delete(name);
+    }
+    refresh();
+  });
+});
+  
+document.getElementById('expandTrajets').addEventListener('click', () => {
+  trajetListEl.style.display = trajetListEl.style.display === 'none' ? 'block' : 'none';
+});
+
+
+
+  
 
   // capitales (on stocke le champ city en name)
   const capitalPoints = (capitalsGeo.features || []).map(f => {
@@ -267,15 +303,19 @@
         lineStyle:{ color:'#f0f0f0', width:1, opacity:0.98 }
       });
     }
-    if(s.showTrajets){
-      series.push({
-        name:'Trajets',
-        type:'lines3D',
-        coordinateSystem:'globe',
-        polyline:true,
-        data: trajetLines
-      });
-    }
+if(s.showTrajets){
+  const filteredTrajets = trajetLines.filter(t =>
+    state.visibleTrajets.has(t.properties?.nom || t.properties?.trajet || 'Sans nom')
+  );
+  series.push({
+    name:'Trajets',
+    type:'lines3D',
+    coordinateSystem:'globe',
+    polyline:true,
+    data: filteredTrajets
+  });
+}
+
     if(s.showCapitales){
       series.push({
         name:'Capitales',
