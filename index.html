@@ -161,13 +161,9 @@
 
   <div id="legend" role="group" aria-label="Contrôles des couches">
     <label><input id="chkPays" type="checkbox"> Limites (Pays)</label>
-    <label id="trajetsLabel">
-      <input id="chkTrajets" type="checkbox"> Trajets
-      <button type="button" id="expandTrajets" aria-label="Voir détails">▼</button>
-    </label>
-    <div id="trajetList" style="margin-left:20px; display:none;"></div>
-
+    <label><input id="chkTrajets" type="checkbox"> Trajets</label>
     <label><input id="chkCapitales" type="checkbox"> Capitales</label>
+    <!-- (Nuages retiré de la légende, désormais un bouton à gauche) -->
   </div>
 
   <div id="moonPreview" title="Aperçu Lune"></div>
@@ -231,54 +227,12 @@
   (countriesGeo.features || []).forEach(f => linesFromPolygonGeom(f.geometry).forEach(l => countryLines.push(l)));
 
   // trajets
-const trajetLines = [];
-const mapColor = { avion:'#0da2ff', train:'#ee0020', bus:'#009c27', voiture:'#900dff' };
-(trajetsGeo.features || []).forEach(f => {
-  const col = mapColor[(f.properties?.trajet || f.properties?.transport || '').toLowerCase()] || '#00ffff';
-  extractLinesFromFeature(f).forEach(l => trajetLines.push({ ...l, lineStyle:{ color: col, width: 3, opacity: 0.95 }, properties:f.properties }));
-});
-
-// Liste unique des noms de trajets
-const trajetNames = [...new Set(
-  trajetLines.map(t => t.properties?.nom || t.properties?.trajet || 'Sans nom')
-)];
-
-// état UI
-let state = {
-  showPays:false,
-  showTrajets:false,
-  showCapitales:false,
-  showNuages:true,
-  isNight:false,
-  showRelief:false,
-  dayBase:'earth',
-  visibleTrajets: new Set(trajetNames) // ajouté ici
-};
-
-// --- construction sous-liste dans la légende ---
-const trajetListEl = document.getElementById('trajetList');
-trajetNames.forEach(name => {
-  const id = 'trajet_' + name.replace(/\s+/g, '_');
-  const div = document.createElement('div');
-  div.innerHTML = `<label><input type="checkbox" id="${id}" checked> ${name}</label>`;
-  trajetListEl.appendChild(div);
-  document.getElementById(id).addEventListener('change', e => {
-    if (e.target.checked) {
-      state.visibleTrajets.add(name);
-    } else {
-      state.visibleTrajets.delete(name);
-    }
-    refresh();
+  const trajetLines = [];
+  const mapColor = { avion:'#0da2ff', train:'#ee0020', bus:'#009c27', voiture:'#900dff' };
+  (trajetsGeo.features || []).forEach(f => {
+    const col = mapColor[(f.properties?.trajet || f.properties?.transport || '').toLowerCase()] || '#00ffff';
+    extractLinesFromFeature(f).forEach(l => trajetLines.push({ ...l, lineStyle:{ color: col, width: 3, opacity: 0.95 }, properties:f.properties }));
   });
-});
-
-// Bouton pour déplier/replier
-document.getElementById('expandTrajets').addEventListener('click', () => {
-  trajetListEl.style.display = trajetListEl.style.display === 'none' ? 'block' : 'none';
-});
-
-
-  
 
   // capitales (on stocke le champ city en name)
   const capitalPoints = (capitalsGeo.features || []).map(f => {
@@ -289,79 +243,87 @@ document.getElementById('expandTrajets').addEventListener('click', () => {
 
   const globeChart = echarts.init(document.getElementById('globeContainer'), null, { renderer:'webgl' });
   const moonChart  = echarts.init(document.getElementById('moonPreview'), null, { renderer:'webgl' });
-  
-function makeOption(s) {
-  const series = [];
-  if(s.showPays){
-    series.push({
-      name:'Pays',
-      type:'lines3D',
-      coordinateSystem:'globe',
-      polyline:true,
-      data: countryLines,
-      lineStyle:{ color:'#f0f0f0', width:1, opacity:0.98 }
-    });
-  }
-  if(s.showTrajets){
-    const filteredTrajets = trajetLines.filter(t =>
-      state.visibleTrajets.has(t.properties?.nom || t.properties?.trajet || 'Sans nom')
-    );
-    series.push({
-      name:'Trajets',
-      type:'lines3D',
-      coordinateSystem:'globe',
-      polyline:true,
-      data: filteredTrajets
-    });
-  }
-  if(s.showCapitales){
-    series.push({
-      name:'Capitales',
-      type:'scatter3D',
-      coordinateSystem:'globe',
-      symbol:'rect',
-      symbolSize:6,
-      itemStyle:{ color:'#ffffff', borderColor:'#000', borderWidth:1 },
-      label:{
-        show:true,
-        formatter: p => p.name || (p.data && (p.data.city||'')) || '',
-        position:'top',
-        distance: 2,
-        textStyle:{ fontSize: 10, color:'#ffffff', backgroundColor:'rgba(0,0,0,0.35)', padding:[2,4], borderRadius:3 }
-      },
-      data: capitalPoints
-    });
-  }
 
-  const baseDay = (s.dayBase === 'earth') ? PATH_EARTH_DAY_1 : PATH_EARTH_DAY_2;
-  const layers = [
-    { type:'blend', blendTo:'emission', texture: PATH_EARTH_NIGHT_RAW, intensity: 1 }
-  ];
-  if(s.showNuages){
-    layers.push({ type:'overlay', texture: CLOUDS, shading: 'lambert', distance: 1 });
-  }
-
-  return {
-    backgroundColor: 'transparent',
-    globe: {
-      baseTexture: baseDay,
-      heightTexture: s.showRelief ? PATH_EARTH_BUMP : undefined,
-      displacementScale: 0.025,
-      shading: 'realistic',
-      environment: PATH_STARFIELD,
-      postEffect: { enable : false},
-      light: {
-        ambient: { color: '#1f1f1f', intensity: 0.2 },
-        main: { color: '#FFFDED', intensity: 1.0, alpha: 0, beta: s.isNight ? 180 : 0 }
-      },
-      atmosphere:{show:true, color: '#a1a1a1', offset:4},
-      viewControl: { autoRotate: false, autoRotateSpeed:0.5 },
-      layers
-    },
-    series
+  // état UI (ajout: base du fond jour)
+  let state = {
+    showPays:false,
+    showTrajets:false,
+    showCapitales:false,
+    showNuages:true,
+    isNight:false,
+    showRelief:false,
+    dayBase:'earth' // 'earth' | 'topo'
   };
-}
 
+  function makeOption(s) {
+    const series = [];
+    if(s.showPays){
+      series.push({
+        name:'Pays',
+        type:'lines3D',
+        coordinateSystem:'globe',
+        polyline:true,
+        data: countryLines,
+        lineStyle:{ color:'#f0f0f0', width:1, opacity:0.98 }
+      });
+    }
+    if(s.showTrajets){
+      series.push({
+        name:'Trajets',
+        type:'lines3D',
+        coordinateSystem:'globe',
+        polyline:true,
+        data: trajetLines
+      });
+    }
+    if(s.showCapitales){
+      series.push({
+        name:'Capitales',
+        type:'scatter3D',
+        coordinateSystem:'globe',
+        symbol:'rect',                 // carrés
+        symbolSize:6,
+        itemStyle:{ color:'#ffffff', borderColor:'#000', borderWidth:1 },
+        label:{
+          show:true,                   // affichage permanent
+          formatter: p => p.name || (p.data && (p.data.city||'')) || '',
+          position:'top',
+          distance: 2,
+          textStyle:{ fontSize: 10, color:'#ffffff', backgroundColor:'rgba(0,0,0,0.35)', padding:[2,4], borderRadius:3 }
+        },
+        data: capitalPoints
+      });
+    }
+
+    const layers = [];
+    // Ombre de nuit uniquement en mode jour
+    if(!s.isNight){
+      layers.push({ show:true, name:'Ombre nuit', type:'blend', intensity: 1, blendTo: 'emission', texture: PATH_EARTH_NIGHT_RAW });
+    }
+    // Nuages via bouton
+    if(s.showNuages){
+      layers.push({ show:true, name:'Nuages', type:'overlay', texture: CLOUDS, shading: 'lambert', distance: 1 });
+    }
+
+    const baseDay = (s.dayBase === 'earth') ? PATH_EARTH_DAY_1 : PATH_EARTH_DAY_2;
+
+    return {
+      backgroundColor: 'transparent',
+      globe: {
+        baseTexture: s.isNight ? nightTexture : baseDay,
+        heightTexture:  s.showRelief ? PATH_EARTH_BUMP : undefined,
+        displacementScale: 0.025,
+        shading: s.isNight ? 'lambert' : 'realistic',
+        environment: PATH_STARFIELD,
+        postEffect: { enable : false},
+        light: { ambient: {color: '#1f1f1f', intensity: 0.2}, main: {color: '#FFFDED', intensity: 0.9} },
+        atmosphere:{show:true, color: '#a1a1a1', offset:4},
+        viewControl: { autoRotate: false, autoRotateSpeed:0.5, /*minDistance: 50, maxDistance: 600, zoomSensitivity: 2, rotateSensitivity: 2*/ },
+        layers
+      },
+      series
+    };
+  }
 
   function refresh(){ globeChart.setOption(makeOption(state), { notMerge:true }); }
 
@@ -382,7 +344,6 @@ function makeOption(s) {
     toggleEl.setAttribute('aria-pressed', String(state.isNight));
     refresh();
   });
-
 
   toggleReliefEl.addEventListener('click', ()=>{
     state.showRelief = !state.showRelief;
