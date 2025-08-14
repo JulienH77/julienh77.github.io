@@ -10,6 +10,8 @@
     background: url('./starfield.jpg') no-repeat center center fixed;
     background-size: cover;
     font-family: Inter, Arial, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
   }
   #root { position:relative; width:100%; height:100%; overflow:hidden; }
   #globeContainer { width:100%; height:100%; }
@@ -29,28 +31,22 @@
     width:32px; height:32px; border-radius:50%;
     background:#ffd54a;
     box-shadow:0 6px 16px rgba(255,213,74,0.28);
-    transition:left .28s, background .28s;
+    transition:left .28s, background .28s, box-shadow .28s;
   }
   #toggle.night .ball { left:64px; background:#f1d56d; }
+  #toggle svg { width:20px; height:20px; }
 
-  /* Toggle relief */
+  /* Toggle relief - sous le bouton jour/nuit */
   #toggleRelief {
-    position: absolute;
-    top: 80px;
-    left: 18px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 120;
-    user-select: none;
+    position: absolute; top: 60px; left: 14px;
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; z-index: 120; user-select: none;
     background: rgba(255,255,255,0.9);
     box-shadow: 0 4px 10px rgba(0,0,0,0.25);
     transition: background 0.2s, transform 0.15s;
   }
+  #toggleRelief svg { width:20px; height:20px; }
   #toggleRelief.active { background: rgba(180,255,180,0.9); }
   #toggleRelief:active { transform: scale(0.95); }
 
@@ -59,10 +55,12 @@
     position:absolute; top:14px; right:14px; z-index:120;
     background: rgba(255,255,255,0.92);
     padding:10px 12px; border-radius:10px;
-    min-width:160px; box-shadow:0 6px 18px rgba(0,0,0,0.18);
+    min-width:200px; box-shadow:0 6px 18px rgba(0,0,0,0.18);
   }
+  #legend .row { display:flex; align-items:center; gap:10px; margin:6px 0; }
   #legend label { display:flex; align-items:center; gap:10px; font-weight:600; }
   #legend input[type=checkbox] { width:16px; height:16px; }
+  #legend select { padding:4px 6px; border-radius:6px; border:1px solid #ccc; font-weight:600; }
 
   /* Lune */
   #moonPreview {
@@ -79,42 +77,55 @@
     font-size:14px; line-height:1.4; max-width:300px;
     display:none; z-index:200;
   }
+
+  .echarts-for-globe { position: absolute; left:0; top:0; width:100%; height:100%; z-index:1; }
 </style>
 
+<!-- ECharts + GL -->
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
 </head>
 <body>
-<div id="root">
-  <div id="globeContainer" class="echarts-for-globe"></div>
+  <div id="root">
+    <div id="globeContainer" class="echarts-for-globe"></div>
 
-  <div id="toggle">
-    <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="#FFD43B"/></svg>
-    <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 0112.21 3 7 7 0 1021 12.79z" fill="#FFDD66"/></svg>
-    <div class="ball"></div>
+    <div id="toggle" role="button" aria-pressed="false" aria-label="Basculer jour/nuit">
+      <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="#FFD43B"/></svg>
+      <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 0112.21 3 7 7 0 1021 12.79z" fill="#FFDD66"/></svg>
+      <div class="ball" aria-hidden="true"></div>
+    </div>
+
+    <div id="toggleRelief" role="button" aria-pressed="false" aria-label="Basculer relief">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 20l5-9 4 7 5-10 5 12z" fill="#444"/>
+        <path d="M3 20h18v1H3z" fill="#777"/>
+      </svg>
+    </div>
+
+    <div id="legend" role="group" aria-label="Contrôles des couches">
+      <div class="row"><label><input id="chkPays" type="checkbox"> Limites (Pays)</label></div>
+      <div class="row"><label><input id="chkTrajets" type="checkbox"> Trajets</label></div>
+      <div class="row"><label><input id="chkCapitales" type="checkbox"> Capitales</label></div>
+      <div class="row"><label><input id="chkNuages" type="checkbox" checked> Nuages</label></div>
+      <div class="row" title="Choisir le fond pour le mode jour">
+        <label for="selBaseDay" style="justify-content:space-between; width:100%">
+          <span>Fond (jour)</span>
+          <select id="selBaseDay">
+            <option value="earth" selected>earth.jpg</option>
+            <option value="topo">world.topo.bathy.200401.jpg</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div id="moonPreview" title="Aperçu Lune"></div>
+    <div id="trajetPopup"></div>
   </div>
-
-  <div id="toggleRelief">
-    <svg viewBox="0 0 24 24">
-      <path d="M3 20l5-9 4 7 5-10 5 12z" fill="#444"/>
-      <path d="M3 20h18v1H3z" fill="#777"/>
-    </svg>
-  </div>
-
-  <div id="legend">
-    <label><input id="chkPays" type="checkbox"> Limites (Pays)</label>
-    <label><input id="chkTrajets" type="checkbox"> Trajets</label>
-    <label><input id="chkCapitales" type="checkbox"> Capitales</label>
-    <label><input id="chkNuages" type="checkbox" checked> Nuages</label>
-  </div>
-
-  <div id="moonPreview"></div>
-  <div id="trajetPopup"></div>
-</div>
 
 <script>
 (async function(){
   const PATH_EARTH_DAY = './earth.jpg';
+  const PATH_EARTH_TOPO = './world.topo.bathy.200401.jpg';
   const CLOUDS = './clouds.png';
   const PATH_EARTH_NIGHT_RAW = './night.jpg';
   const PATH_STARFIELD = './starfield.jpg';
@@ -123,24 +134,23 @@
   const PATH_COUNTRIES = './countries_10m_new.geojson';
   const PATH_TRAJETS = './ALLLINE_TRAJET_wgs.geojson';
   const PATH_CAPITALS = './capitals.geojson';
-  const PATH_EARTH_BUMP = './world.topo.bathy.200401.jpg';
+  const PATH_EARTH_BUMP = './world.topo.bathy.200401.jpg'; // utilisé pour le relief (heightTexture)
 
-  const loadJSON = url => fetch(url).then(r=>r.json());
-  const loadImage = url => new Promise((res, rej) => { const img = new Image(); img.crossOrigin = 'anonymous'; img.onload = ()=>res(img); img.onerror = rej; img.src = url; });
-  const normalizeLng = lng => ((lng + 180) % 360) - 180;
+  function loadJSON(url){ return fetch(url).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
+  function loadImage(url){ return new Promise((res, rej) => { const img = new Image(); img.crossOrigin = 'anonymous'; img.onload = ()=>res(img); img.onerror = rej; img.src = url; }); }
+  function normalizeLng(lng){ return ((lng + 180) % 360) - 180; }
 
-  const linesFromPolygonGeom = geom => {
+  function linesFromPolygonGeom(geom){
     const out = [];
     if(!geom) return out;
     if(geom.type === 'Polygon'){
       geom.coordinates.forEach(ring => out.push({ coords: ring.map(([x,y]) => [normalizeLng(x), y, 0.001]) }));
     } else if(geom.type === 'MultiPolygon'){
-      geom.coordinates.forEach(poly => poly.forEach(ring => out.push({ coords: ring.map(([x,y]) => [normalizeLng(x), y, 0.001]) })));
+      geom.coordinates.forEach(polygon => polygon.forEach(ring => out.push({ coords: ring.map(([x,y]) => [normalizeLng(x), y, 0.001]) })));
     }
     return out;
-  };
-
-  const extractLinesFromFeature = feature => {
+  }
+  function extractLinesFromFeature(feature){
     const out = [], g = feature && feature.geometry;
     if(!g) return out;
     if(g.type === 'LineString'){
@@ -151,52 +161,125 @@
       linesFromPolygonGeom(g).forEach(l => out.push(l));
     }
     return out;
-  };
+  }
 
-  const nightTexture = (await loadImage(PATH_EARTH_NIGHT_RAW))
-    .src;
+  // texture de nuit (non tintée ici pour rester fidèle au fichier)
+  let nightTexture;
+  try { await loadImage(PATH_EARTH_NIGHT_RAW); nightTexture = PATH_EARTH_NIGHT_RAW; } catch { nightTexture = PATH_EARTH_DAY; }
 
-  const [countriesGeo, trajetsGeo, capitalsGeo] = await Promise.all([
+  let [countriesGeo, trajetsGeo, capitalsGeo] = await Promise.all([
     loadJSON(PATH_COUNTRIES),
     loadJSON(PATH_TRAJETS),
     loadJSON(PATH_CAPITALS)
   ]);
 
   const countryLines = [];
-  countriesGeo.features.forEach(f => linesFromPolygonGeom(f.geometry).forEach(l => countryLines.push(l)));
+  (countriesGeo.features || []).forEach(f => linesFromPolygonGeom(f.geometry).forEach(l => countryLines.push(l)));
 
   const trajetLines = [];
   const mapColor = { avion:'#0da2ff', train:'#ee0020', bus:'#009c27', voiture:'#900dff' };
-  trajetsGeo.features.forEach(f => {
-    const col = mapColor[(f.properties?.trajet || f.properties?.transport || '').toLowerCase()] || '#00ffff';
-    extractLinesFromFeature(f).forEach(l => trajetLines.push({ ...l, lineStyle:{ color: col, width: 3 }, properties:f.properties }));
+  (trajetsGeo.features || []).forEach(f => {
+    const key = (f.properties?.trajet || f.properties?.transport || '').toLowerCase();
+    const col = mapColor[key] || '#00ffff';
+    extractLinesFromFeature(f).forEach(l => {
+      trajetLines.push({
+        ...l,
+        lineStyle:{ color: col, width: 3, opacity: 0.95 },
+        properties: f.properties
+      });
+    });
   });
 
-  const capitalPoints = capitalsGeo.features.map(f => {
+  const capitalPoints = (capitalsGeo.features || []).map(f => {
     const [x,y] = f.geometry.coordinates;
-    return { name: f.properties?.city || '', value: [normalizeLng(x), y, 0] };
+    const city = f.properties?.city || '';
+    return {
+      name: city,           // pour l'étiquette et tooltip
+      value: [ normalizeLng(x), y, 0 ],
+      city                   // on garde aussi le champ brut au cas où
+    };
   });
 
   const globeChart = echarts.init(document.getElementById('globeContainer'), null, { renderer:'webgl' });
   const moonChart  = echarts.init(document.getElementById('moonPreview'), null, { renderer:'webgl' });
 
-  let state = { showPays:false, showTrajets:false, showCapitales:false, showNuages:true, isNight:false, showRelief:false };
+  const toggleEl = document.getElementById('toggle');
+  const toggleReliefEl = document.getElementById('toggleRelief');
+  const chkPays = document.getElementById('chkPays');
+  const chkTrajets = document.getElementById('chkTrajets');
+  const chkCapitales = document.getElementById('chkCapitales');
+  const chkNuages = document.getElementById('chkNuages');
+  const selBaseDay = document.getElementById('selBaseDay');
+  const popupEl = document.getElementById('trajetPopup');
 
-  function makeOption(s) {
+  let state = {
+    showPays:false,
+    showTrajets:false,
+    showCapitales:false,
+    showNuages:true,
+    isNight:false,
+    showRelief:false,
+    baseDay:'earth' // 'earth' | 'topo'
+  };
+
+  function makeOption({ showPays, showTrajets, showCapitales, showNuages, isNight, showRelief, baseDay }) {
     const series = [];
-    if(s.showPays) series.push({ name:'Pays', type:'lines3D', coordinateSystem:'globe', polyline:true, data: countryLines, lineStyle:{ color:'#f0f0f0', width:1 } });
-    if(s.showTrajets) series.push({ name:'Trajets', type:'lines3D', coordinateSystem:'globe', polyline:true, data: trajetLines });
-    if(s.showCapitales) series.push({ name:'Capitales', type:'scatter3D', coordinateSystem:'globe', symbolSize:6, label:{show:true, formatter:p=>p.name, textStyle:{ fontSize:10, color:'#fff' }}, data: capitalPoints });
+    if(showPays){
+      series.push({
+        name:'Pays', type:'lines3D', coordinateSystem:'globe', polyline:true,
+        data: countryLines,
+        lineStyle:{ color:'#f0f0f0', width:1, opacity:0.98 }
+      });
+    }
+    if(showTrajets){
+      series.push({ name:'Trajets', type:'lines3D', coordinateSystem:'globe', polyline:true, data: trajetLines });
+    }
+    if(showCapitales){
+      series.push({
+        name:'Capitales', type:'scatter3D', coordinateSystem:'globe',
+        symbol:'rect',            // carré
+        symbolSize: [6,6],        // taille carrée
+        itemStyle:{ color:'#ffffff', borderColor:'#000000', borderWidth:1.2 },
+        label:{
+          show:true,
+          formatter: (p)=> p.name || (p.data && (p.data.city||'')) || '',
+          position:'top',
+          distance: 2,
+          textStyle:{ fontSize: 10, color:'#ffffff', backgroundColor:'rgba(0,0,0,0.35)', padding:[2,4], borderRadius:3 }
+        },
+        emphasis:{ label:{ show:true } },
+        data: capitalPoints
+      });
+    }
 
     const layers = [];
-    if(!s.isNight){
-      layers.push({ show:true, name:'Ombre nuit', type:'blend', intensity:1, blendTo:'emission', texture: PATH_EARTH_NIGHT_RAW });
+    // Ombre de la nuit uniquement en mode jour
+    if(!isNight){
+      layers.push({ show:true, name:'Ombre nuit', type:'blend', intensity: 1, blendTo: 'emission', texture: PATH_EARTH_NIGHT_RAW });
     }
-    if(s.showNuages){
-      layers.push({ show:true, name:'Nuages', type:'overlay', texture: CLOUDS, shading:'lambert', distance:1 });
+    if(showNuages){
+      layers.push({ show:true, name:'Nuages', type:'overlay', texture: CLOUDS, shading: 'lambert', distance: 1 });
     }
 
+    const baseTextureDay = (baseDay === 'earth') ? PATH_EARTH_DAY : PATH_EARTH_TOPO;
+
     return {
+      backgroundColor: 'transparent',
+      tooltip: { show:true, trigger:'item', formatter: (p)=> p.seriesName === 'Capitales' ? (p.name||'') : p.seriesName },
+      /*globe: {
+        baseTexture: isNight ? nightTexture : baseTextureDay,
+        heightTexture:  (showRelief) ? PATH_EARTH_BUMP : undefined,
+        displacementScale: showRelief ? 0.025 : 0, // si on veut l'effet uniquement activé
+        shading: 'realistic',
+        environment: PATH_STARFIELD,
+        light: {
+          ambient: { intensity: 0.25 },
+          main: { intensity: 0.9 }
+        },
+        atmosphere:{ show:true, color: '#a1a1a1', offset:4 },
+        viewControl: { autoRotate: false, autoRotateSpeed:1, minDistance: 50, maxDistance: 600, zoomSensitivity: 2, rotateSensitivity: 2 },
+        layers
+      },*/
       globe: {
         baseTexture: s.isNight ? nightTexture : PATH_EARTH_DAY,
         heightTexture: s.showRelief ? PATH_EARTH_BUMP : undefined,
@@ -213,31 +296,67 @@
     };
   }
 
-  function refresh() { globeChart.setOption(makeOption(state), { notMerge:true }); }
+  function refreshFromUI(){
+    state.showPays = chkPays.checked;
+    state.showTrajets = chkTrajets.checked;
+    state.showCapitales = chkCapitales.checked;
+    state.showNuages = chkNuages.checked;
+    state.baseDay = selBaseDay.value; // 'earth' | 'topo'
+    globeChart.setOption(makeOption(state), { notMerge:true });
+  }
 
-  document.getElementById('toggle').addEventListener('click', e=>{
+  // init charts
+  globeChart.setOption(makeOption(state));
+  moonChart.setOption({
+    backgroundColor: 'transparent',
+    globe: {
+      baseTexture: PATH_MOON_BASE,
+      heightTexture: PATH_MOON_BUMP,
+      shading: 'lambert',
+      environment: PATH_STARFIELD,
+      light: { main:{ intensity:0.9, alpha: 0, beta: 0 }, ambient:{ intensity:0.1 } },
+      viewControl: { autoRotate:true, autoRotateSpeed:1.6, distance:220 }
+    },
+    series:[]
+  });
+
+  // UI events
+  toggleEl.addEventListener('click', ()=>{
     state.isNight = !state.isNight;
-    e.currentTarget.classList.toggle('night', state.isNight);
-    refresh();
+    toggleEl.classList.toggle('night', state.isNight);
+    toggleEl.setAttribute('aria-pressed', String(state.isNight));
+    // le relief reste tel quel
+    refreshFromUI();
   });
 
-  document.getElementById('toggleRelief').addEventListener('click', e=>{
+  toggleReliefEl.addEventListener('click', ()=>{
     state.showRelief = !state.showRelief;
-    e.currentTarget.classList.toggle('active', state.showRelief);
-    refresh();
+    toggleReliefEl.classList.toggle('active', state.showRelief);
+    toggleReliefEl.setAttribute('aria-pressed', String(state.showRelief));
+    refreshFromUI();
   });
 
-  ['Pays','Trajets','Capitales','Nuages'].forEach(name=>{
-    document.getElementById('chk'+name).addEventListener('change', e=>{
-      state['show'+name] = e.target.checked;
-      refresh();
-    });
+  [chkPays, chkTrajets, chkCapitales, chkNuages, selBaseDay].forEach(el => el.addEventListener('change', refreshFromUI));
+
+  // Popup clic sur un trajet
+  globeChart.on('click', params => {
+    if(params.seriesName === 'Trajets' && params.data && params.data.properties){
+      const p = params.data.properties;
+      popupEl.innerHTML = `
+        <strong>Trajet:</strong> ${p.trajet || ''}<br/>
+        <strong>Date début:</strong> ${p.date_deb || ''}<br/>
+        <strong>Date fin:</strong> ${p.date_fin || ''}<br/>
+        <strong>Durée:</strong> ${p.duree || ''}<br/>
+        <strong>Distance:</strong> ${p.distanceKM || ''} km
+      `;
+      popupEl.style.display = 'block';
+    } else {
+      popupEl.style.display = 'none';
+    }
   });
 
-  refresh();
-
-  moonChart.setOption({ globe: { baseTexture: PATH_MOON_BASE, heightTexture: PATH_MOON_BUMP, shading: 'lambert', environment: PATH_STARFIELD, viewControl: { autoRotate:true, distance:220 } } });
 })();
 </script>
 </body>
 </html>
+
