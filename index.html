@@ -286,7 +286,7 @@
 
         globe: {
           baseTexture: PATH_EARTH_BUMP,
-          heightTexture: PATH_EARTH_BUMP,
+          heightTexture:  (showRelief) ? PATH_EARTH_BUMP : undefined,,
           displacementScale: 0.025,
           shading: 'realistic',
           environment: PATH_STARFIELD,
