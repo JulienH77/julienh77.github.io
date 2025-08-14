@@ -262,7 +262,7 @@
     }
     return {
       backgroundColor: 'transparent',
-      globe: {
+      /*globe: {
         baseTexture: (isNight) ? nightTexture : dayTexture,
         heightTexture: (showRelief) ? PATH_EARTH_BUMP : undefined,
         displacementScale: 0.025,
@@ -270,14 +270,10 @@
         atmosphere: {show:true, color: '#a1a1a1', offset:4},
         environment: PATH_STARFIELD,
         light: {
-          ambient: {
-            color: '#1f1f1f',
-            intensity: 0.2},
-          main: {
-            color: '#FFFDED', intensity: 0.9
-          }
+          ambient: {color: '#1f1f1f', intensity: 0.2},
+          main: {color: '#FFFDED', intensity: 0.9}
         },
-        viewControl: { autoRotate: false, autoRotateSpeed: AUTO_ROTATE_SPEED, /*minDistance: 50, maxDistance: 600, zoomSensitivity: 2, rotateSensitivity: 2*/ },
+        viewControl: { autoRotate: false, autoRotateSpeed: AUTO_ROTATE_SPEED, minDistance: 50, maxDistance: 600, zoomSensitivity: 2, rotateSensitivity: 2 },
         layers: [
           { show: true,
             name: 'pollution lumineuse',
@@ -287,14 +283,14 @@
             texture: PATH_EARTH_NIGHT_RAW
           },
           { 
-            show: true,
+            show: false,
             name: 'nuages',
             type: 'overlay',
             texture: CLOUDS,
             shading: 'lambert',
             distance: 1
           }
-                ]}, 
+                ]},*/
       
         /*globe: {
           baseTexture: dayTexture,
@@ -321,9 +317,9 @@
               distance: 1
             }]  },*/
 
-        /*globe: {
+        globe: {
           baseTexture: PATH_EARTH_BUMP,
-          heightTexture:  (showRelief) ? PATH_EARTH_BUMP : undefined,,
+          heightTexture:  (showRelief) ? PATH_EARTH_BUMP : undefined,
           displacementScale: 0.025,
           shading: 'realistic',
           environment: PATH_STARFIELD,
@@ -348,7 +344,7 @@
               texture: CLOUDS,
               shading: 'lambert',
               distance: 1
-            }] },*/
+            }] },
 
 
 
