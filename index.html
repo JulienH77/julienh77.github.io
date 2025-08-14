@@ -1,362 +1,174 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Globe — jour / nuit / légende / lune</title>
+<meta charset="UTF-8">
+<title>Globe Jour/Nuit + Relief + Capitales</title>
 <style>
-  html,body,#root { height:100%; margin:0; padding:0; }
-  body{
-    background: url('./starfield.jpg') no-repeat center center fixed;
-    background-size: cover;
-    font-family: Inter, Arial, sans-serif;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-  }
-  #root { position:relative; width:100%; height:100%; overflow:hidden; }
-  #globeContainer { width:100%; height:100%; }
-
-  /* Toggle jour/nuit */
-  #toggle {
-    position:absolute; top:14px; left:14px;
-    width:100px; height:40px; border-radius:22px;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:4px 8px; cursor:pointer; z-index:120; user-select:none;
-    background: linear-gradient(90deg,#ffe066 50%, #4a90e2 50%);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-  }
-  #toggle.night { background: linear-gradient(90deg,#4a90e2 50%, #ffe066 50%); }
-  #toggle .ball {
-    position:absolute; top:4px; left:4px;
-    width:32px; height:32px; border-radius:50%;
-    background:#ffd54a;
-    box-shadow:0 6px 16px rgba(255,213,74,0.28);
-    transition:left .28s, background .28s, box-shadow .28s;
-  }
-  #toggle.night .ball { left:64px; background:#f1d56d; }
-  #toggle svg { width:20px; height:20px; }
-
-  /* Toggle relief - sous le bouton jour/nuit */
-  #toggleRelief {
-    position: absolute; top: 60px; left: 14px;
-    width: 40px; height: 40px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; z-index: 120; user-select: none;
+  html, body { margin:0; padding:0; height:100%; background:#000; }
+  #chart { width:100%; height:100%; }
+  #toggleDayNight, #toggleRelief {
+    position: absolute;
+    left: 14px;
+    width: 40px; height: 40px;
+    border-radius: 50%;
     background: rgba(255,255,255,0.9);
     box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; user-select: none;
     transition: background 0.2s, transform 0.15s;
+    z-index: 120;
   }
-  #toggleRelief svg { width:20px; height:20px; }
-  #toggleRelief.active { background: rgba(180,255,180,0.9); }
-  #toggleRelief:active { transform: scale(0.95); }
-
-  /* Légende */
-  #legend {
-    position:absolute; top:14px; right:14px; z-index:120;
-    background: rgba(255,255,255,0.92);
-    padding:10px 12px; border-radius:10px;
-    min-width:200px; box-shadow:0 6px 18px rgba(0,0,0,0.18);
+  #toggleDayNight { top: 14px; }
+  #toggleRelief { top: 60px; }
+  #toggleDayNight:active, #toggleRelief:active { transform: scale(0.95); }
+  #dayTextureSelect {
+    position: absolute;
+    top: 110px; left: 14px;
+    z-index: 120;
+    background: rgba(255,255,255,0.9);
+    padding: 4px;
+    border-radius: 6px;
   }
-  #legend .row { display:flex; align-items:center; gap:10px; margin:6px 0; }
-  #legend label { display:flex; align-items:center; gap:10px; font-weight:600; }
-  #legend input[type=checkbox] { width:16px; height:16px; }
-  #legend select { padding:4px 6px; border-radius:6px; border:1px solid #ccc; font-weight:600; }
-
-  /* Lune */
-  #moonPreview {
-    position:absolute; bottom:14px; right:14px;
-    width:140px; height:140px; z-index:110; border-radius:50%;
-    overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.6); background:black;
-  }
-
-  /* Popup stats */
-  #trajetPopup {
-    position:absolute; bottom:20px; left:20px;
-    background:rgba(0,0,0,0.85); color:white;
-    padding:10px 14px; border-radius:8px;
-    font-size:14px; line-height:1.4; max-width:300px;
-    display:none; z-index:200;
-  }
-
-  .echarts-for-globe { position: absolute; left:0; top:0; width:100%; height:100%; z-index:1; }
 </style>
-
-<!-- ECharts + GL -->
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
 </head>
 <body>
-  <div id="root">
-    <div id="globeContainer" class="echarts-for-globe"></div>
-
-    <div id="toggle" role="button" aria-pressed="false" aria-label="Basculer jour/nuit">
-      <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="#FFD43B"/></svg>
-      <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 0112.21 3 7 7 0 1021 12.79z" fill="#FFDD66"/></svg>
-      <div class="ball" aria-hidden="true"></div>
-    </div>
-
-    <div id="toggleRelief" role="button" aria-pressed="false" aria-label="Basculer relief">
-      <svg viewBox="0 0 24 24">
-        <path d="M3 20l5-9 4 7 5-10 5 12z" fill="#444"/>
-        <path d="M3 20h18v1H3z" fill="#777"/>
-      </svg>
-    </div>
-
-    <div id="legend" role="group" aria-label="Contrôles des couches">
-      <div class="row"><label><input id="chkPays" type="checkbox"> Limites (Pays)</label></div>
-      <div class="row"><label><input id="chkTrajets" type="checkbox"> Trajets</label></div>
-      <div class="row"><label><input id="chkCapitales" type="checkbox"> Capitales</label></div>
-      <div class="row"><label><input id="chkNuages" type="checkbox" checked> Nuages</label></div>
-      <div class="row" title="Choisir le fond pour le mode jour">
-        <label for="selBaseDay" style="justify-content:space-between; width:100%">
-          <span>Fond (jour)</span>
-          <select id="selBaseDay">
-            <option value="earth" selected>earth.jpg</option>
-            <option value="topo">world.topo.bathy.200401.jpg</option>
-          </select>
-        </label>
-      </div>
-    </div>
-
-    <div id="moonPreview" title="Aperçu Lune"></div>
-    <div id="trajetPopup"></div>
-  </div>
+<div id="chart"></div>
+<div id="toggleDayNight">☀️</div>
+<div id="toggleRelief">⛰️</div>
+<select id="dayTextureSelect">
+  <option value="earth.jpg">Earth.jpg</option>
+  <option value="world.topo.bathy.200401.jpg">Topo+Bathy</option>
+</select>
 
 <script>
-(async function(){
-  const PATH_EARTH_DAY = './earth.jpg';
-  const PATH_EARTH_TOPO = './world.topo.bathy.200401.jpg';
-  const CLOUDS = './clouds.png';
-  const PATH_EARTH_NIGHT_RAW = './night.jpg';
-  const PATH_STARFIELD = './starfield.jpg';
-  const PATH_MOON_BASE = './moon-base.jpg';
-  const PATH_MOON_BUMP = './moon-bump.jpg';
-  const PATH_COUNTRIES = './countries_10m_new.geojson';
-  const PATH_TRAJETS = './ALLLINE_TRAJET_wgs.geojson';
-  const PATH_CAPITALS = './capitals.geojson';
-  const PATH_EARTH_BUMP = './world.topo.bathy.200401.jpg'; // utilisé pour le relief (heightTexture)
+const chart = echarts.init(document.getElementById('chart'));
 
-  function loadJSON(url){ return fetch(url).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }); }
-  function loadImage(url){ return new Promise((res, rej) => { const img = new Image(); img.crossOrigin = 'anonymous'; img.onload = ()=>res(img); img.onerror = rej; img.src = url; }); }
-  function normalizeLng(lng){ return ((lng + 180) % 360) - 180; }
+// --- Variables d'état ---
+let isNight = false;
+let showRelief = false;
+let dayTextureChoice = 'earth.jpg';
 
-  function linesFromPolygonGeom(geom){
-    const out = [];
-    if(!geom) return out;
-    if(geom.type === 'Polygon'){
-      geom.coordinates.forEach(ring => out.push({ coords: ring.map(([x,y]) => [normalizeLng(x), y, 0.001]) }));
-    } else if(geom.type === 'MultiPolygon'){
-      geom.coordinates.forEach(polygon => polygon.forEach(ring => out.push({ coords: ring.map(([x,y]) => [normalizeLng(x), y, 0.001]) })));
-    }
-    return out;
-  }
-  function extractLinesFromFeature(feature){
-    const out = [], g = feature && feature.geometry;
-    if(!g) return out;
-    if(g.type === 'LineString'){
-      out.push({ coords: g.coordinates.map(([x,y]) => [normalizeLng(x), y]) });
-    } else if(g.type === 'MultiLineString'){
-      g.coordinates.forEach(lineCoords => out.push({ coords: lineCoords.map(([x,y]) => [normalizeLng(x), y]) }));
-    } else if(g.type === 'Polygon' || g.type === 'MultiPolygon'){
-      linesFromPolygonGeom(g).forEach(l => out.push(l));
-    }
-    return out;
-  }
+// --- Chemins vers textures ---
+const PATH_EARTH_DAY = dayTextureChoice;
+const PATH_EARTH_NIGHT = 'earth_night.jpg';
+const PATH_EARTH_BUMP = 'earth_bump.jpg';
+const PATH_STARFIELD = 'starfield.jpg';
+const PATH_CLOUDS = 'clouds.png';
 
-  // texture de nuit (non tintée ici pour rester fidèle au fichier)
-  let nightTexture;
-  try { await loadImage(PATH_EARTH_NIGHT_RAW); nightTexture = PATH_EARTH_NIGHT_RAW; } catch { nightTexture = PATH_EARTH_DAY; }
+// --- Données capitales (exemple) ---
+const capitalesData = [
+  { city: 'Paris', coord: [2.3522, 48.8566] },
+  { city: 'Shanghai', coord: [121.4737, 31.2304] },
+  { city: 'New York', coord: [-74.006, 40.7128] }
+];
 
-  let [countriesGeo, trajetsGeo, capitalsGeo] = await Promise.all([
-    loadJSON(PATH_COUNTRIES),
-    loadJSON(PATH_TRAJETS),
-    loadJSON(PATH_CAPITALS)
-  ]);
+// --- Fonction création option ---
+function makeOption(s) {
+  const layers = [];
 
-  const countryLines = [];
-  (countriesGeo.features || []).forEach(f => linesFromPolygonGeom(f.geometry).forEach(l => countryLines.push(l)));
-
-  const trajetLines = [];
-  const mapColor = { avion:'#0da2ff', train:'#ee0020', bus:'#009c27', voiture:'#900dff' };
-  (trajetsGeo.features || []).forEach(f => {
-    const key = (f.properties?.trajet || f.properties?.transport || '').toLowerCase();
-    const col = mapColor[key] || '#00ffff';
-    extractLinesFromFeature(f).forEach(l => {
-      trajetLines.push({
-        ...l,
-        lineStyle:{ color: col, width: 3, opacity: 0.95 },
-        properties: f.properties
-      });
+  // Ombre nuit uniquement en mode jour
+  if (!s.isNight) {
+    layers.push({
+      type: 'blend',
+      blendTo: 'emission',
+      texture: PATH_EARTH_NIGHT,
+      intensity: 0.7
     });
-  });
-
-  const capitalPoints = (capitalsGeo.features || []).map(f => {
-    const [x,y] = f.geometry.coordinates;
-    const city = f.properties?.city || '';
-    return {
-      name: city,           // pour l'étiquette et tooltip
-      value: [ normalizeLng(x), y, 0 ],
-      city                   // on garde aussi le champ brut au cas où
-    };
-  });
-
-  const globeChart = echarts.init(document.getElementById('globeContainer'), null, { renderer:'webgl' });
-  const moonChart  = echarts.init(document.getElementById('moonPreview'), null, { renderer:'webgl' });
-
-  const toggleEl = document.getElementById('toggle');
-  const toggleReliefEl = document.getElementById('toggleRelief');
-  const chkPays = document.getElementById('chkPays');
-  const chkTrajets = document.getElementById('chkTrajets');
-  const chkCapitales = document.getElementById('chkCapitales');
-  const chkNuages = document.getElementById('chkNuages');
-  const selBaseDay = document.getElementById('selBaseDay');
-  const popupEl = document.getElementById('trajetPopup');
-
-  let state = {
-    showPays:false,
-    showTrajets:false,
-    showCapitales:false,
-    showNuages:true,
-    isNight:false,
-    showRelief:false,
-    baseDay:'earth' // 'earth' | 'topo'
-  };
-
-  function makeOption({ showPays, showTrajets, showCapitales, showNuages, isNight, showRelief, baseDay }) {
-    const series = [];
-    if(showPays){
-      series.push({
-        name:'Pays', type:'lines3D', coordinateSystem:'globe', polyline:true,
-        data: countryLines,
-        lineStyle:{ color:'#f0f0f0', width:1, opacity:0.98 }
-      });
-    }
-    if(showTrajets){
-      series.push({ name:'Trajets', type:'lines3D', coordinateSystem:'globe', polyline:true, data: trajetLines });
-    }
-    if(showCapitales){
-      series.push({
-        name:'Capitales', type:'scatter3D', coordinateSystem:'globe',
-        symbol:'rect',            // carré
-        symbolSize: [6,6],        // taille carrée
-        itemStyle:{ color:'#ffffff', borderColor:'#000000', borderWidth:1.2 },
-        label:{
-          show:true,
-          formatter: (p)=> p.name || (p.data && (p.data.city||'')) || '',
-          position:'top',
-          distance: 2,
-          textStyle:{ fontSize: 10, color:'#ffffff', backgroundColor:'rgba(0,0,0,0.35)', padding:[2,4], borderRadius:3 }
-        },
-        emphasis:{ label:{ show:true } },
-        data: capitalPoints
-      });
-    }
-
-    const layers = [];
-    // Ombre de la nuit uniquement en mode jour
-    if(!isNight){
-      layers.push({ show:true, name:'Ombre nuit', type:'blend', intensity: 1, blendTo: 'emission', texture: PATH_EARTH_NIGHT_RAW });
-    }
-    if(showNuages){
-      layers.push({ show:true, name:'Nuages', type:'overlay', texture: CLOUDS, shading: 'lambert', distance: 1 });
-    }
-
-    const baseTextureDay = (baseDay === 'earth') ? PATH_EARTH_DAY : PATH_EARTH_TOPO;
-
-    return {
-      backgroundColor: 'transparent',
-      tooltip: { show:true, trigger:'item', formatter: (p)=> p.seriesName === 'Capitales' ? (p.name||'') : p.seriesName },
-      /*globe: {
-        baseTexture: isNight ? nightTexture : baseTextureDay,
-        heightTexture:  (showRelief) ? PATH_EARTH_BUMP : undefined,
-        displacementScale: showRelief ? 0.025 : 0, // si on veut l'effet uniquement activé
-        shading: 'realistic',
-        environment: PATH_STARFIELD,
-        light: {
-          ambient: { intensity: 0.25 },
-          main: { intensity: 0.9 }
-        },
-        atmosphere:{ show:true, color: '#a1a1a1', offset:4 },
-        viewControl: { autoRotate: false, autoRotateSpeed:1, minDistance: 50, maxDistance: 600, zoomSensitivity: 2, rotateSensitivity: 2 },
-        layers
-      },*/
-      globe: {
-        baseTexture: s.isNight ? nightTexture : PATH_EARTH_DAY,
-        heightTexture: s.showRelief ? PATH_EARTH_BUMP : undefined,
-        displacementScale: 0.025,
-        shading: s.isNight ? 'lambert' : 'realistic',
-        environment: PATH_STARFIELD,
-        postEffect: { enable : false},
-        light: { ambient: {color: '#1f1f1f', intensity: 0.2}, main: {color: '#FFFDED', intensity: 0.9} },
-        atmosphere:{show:true, color: '#a1a1a1', offset:4},
-        viewControl: { autoRotate: false, autoRotateSpeed:0.5, /*minDistance: 50, maxDistance: 600, zoomSensitivity: 2, rotateSensitivity: 2*/ },
-        layers
-      },
-      series
-    };
   }
 
-  function refreshFromUI(){
-    state.showPays = chkPays.checked;
-    state.showTrajets = chkTrajets.checked;
-    state.showCapitales = chkCapitales.checked;
-    state.showNuages = chkNuages.checked;
-    state.baseDay = selBaseDay.value; // 'earth' | 'topo'
-    globeChart.setOption(makeOption(state), { notMerge:true });
-  }
+  // Nuages (toujours affichés ici)
+  layers.push({
+    type: 'overlay',
+    texture: PATH_CLOUDS,
+    shading: 'lambert',
+    distance: 1.02
+  });
 
-  // init charts
-  globeChart.setOption(makeOption(state));
-  moonChart.setOption({
-    backgroundColor: 'transparent',
+  return {
+    backgroundColor: '#000',
     globe: {
-      baseTexture: PATH_MOON_BASE,
-      heightTexture: PATH_MOON_BUMP,
-      shading: 'lambert',
+      baseTexture: s.isNight ? PATH_EARTH_NIGHT : s.dayTexture,
+      heightTexture: s.showRelief ? PATH_EARTH_BUMP : undefined,
+      displacementScale: 0.025,
+      shading: s.isNight ? 'lambert' : 'realistic',
       environment: PATH_STARFIELD,
-      light: { main:{ intensity:0.9, alpha: 0, beta: 0 }, ambient:{ intensity:0.1 } },
-      viewControl: { autoRotate:true, autoRotateSpeed:1.6, distance:220 }
+      postEffect: { enable : false },
+      light: {
+        ambient: {color: '#1f1f1f', intensity: 0.2},
+        main: {color: '#FFFDED', intensity: 0.9}
+      },
+      atmosphere:{show:true, color: '#a1a1a1', offset:4},
+      viewControl: { autoRotate: false, autoRotateSpeed:0.5 },
+      layers
     },
-    series:[]
-  });
+    series: [
+      {
+        type: 'scatter3D',
+        coordinateSystem: 'globe',
+        symbol: 'rect',
+        symbolSize: [6,6],
+        itemStyle: {
+          color: '#fff',
+          borderColor: '#000',
+          borderWidth: 1
+        },
+        label: {
+          show: true,
+          position: 'right',
+          formatter: p => p.data.city,
+          color: '#fff',
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          borderRadius: 3,
+          padding: 2
+        },
+        data: capitalesData.map(c => ({
+          name: c.city,
+          value: [...c.coord, 0],
+          city: c.city
+        }))
+      }
+    ]
+  };
+}
 
-  // UI events
-  toggleEl.addEventListener('click', ()=>{
-    state.isNight = !state.isNight;
-    toggleEl.classList.toggle('night', state.isNight);
-    toggleEl.setAttribute('aria-pressed', String(state.isNight));
-    // le relief reste tel quel
-    refreshFromUI();
-  });
+// --- Rendu initial ---
+chart.setOption(makeOption({
+  isNight,
+  showRelief,
+  dayTexture: dayTextureChoice
+}));
 
-  toggleReliefEl.addEventListener('click', ()=>{
-    state.showRelief = !state.showRelief;
-    toggleReliefEl.classList.toggle('active', state.showRelief);
-    toggleReliefEl.setAttribute('aria-pressed', String(state.showRelief));
-    refreshFromUI();
-  });
+// --- Bouton jour/nuit ---
+document.getElementById('toggleDayNight').onclick = () => {
+  isNight = !isNight;
+  chart.setOption(makeOption({
+    isNight,
+    showRelief,
+    dayTexture: dayTextureChoice
+  }));
+};
 
-  [chkPays, chkTrajets, chkCapitales, chkNuages, selBaseDay].forEach(el => el.addEventListener('change', refreshFromUI));
+// --- Bouton relief ---
+document.getElementById('toggleRelief').onclick = () => {
+  showRelief = !showRelief;
+  chart.setOption(makeOption({
+    isNight,
+    showRelief,
+    dayTexture: dayTextureChoice
+  }));
+};
 
-  // Popup clic sur un trajet
-  globeChart.on('click', params => {
-    if(params.seriesName === 'Trajets' && params.data && params.data.properties){
-      const p = params.data.properties;
-      popupEl.innerHTML = `
-        <strong>Trajet:</strong> ${p.trajet || ''}<br/>
-        <strong>Date début:</strong> ${p.date_deb || ''}<br/>
-        <strong>Date fin:</strong> ${p.date_fin || ''}<br/>
-        <strong>Durée:</strong> ${p.duree || ''}<br/>
-        <strong>Distance:</strong> ${p.distanceKM || ''} km
-      `;
-      popupEl.style.display = 'block';
-    } else {
-      popupEl.style.display = 'none';
-    }
-  });
-
-})();
+// --- Choix texture jour ---
+document.getElementById('dayTextureSelect').onchange = e => {
+  dayTextureChoice = e.target.value;
+  chart.setOption(makeOption({
+    isNight,
+    showRelief,
+    dayTexture: dayTextureChoice
+  }));
+};
 </script>
 </body>
 </html>
-
