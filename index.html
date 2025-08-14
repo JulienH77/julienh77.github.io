@@ -36,6 +36,28 @@
   #toggle.night .ball { left:64px; background:#f1d56d; }
   #toggle svg { width:20px; height:20px; }
 
+  /* Toggle relief */
+  #toggleRelief {
+    position: absolute;
+    top: 60px;
+    left: 14px;
+    width: 100px;
+    height: 40px;
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 120;
+    user-select: none;
+    background: rgba(255,255,255,0.85);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    font-weight: bold;
+  }
+  #toggleRelief.active {
+    background: rgba(180,255,180,0.9);
+  }
+
   /* Légende */
   #legend {
     position:absolute; top:14px; right:14px; z-index:120;
@@ -79,6 +101,8 @@
       <div class="ball" aria-hidden="true"></div>
     </div>
 
+    <div id="toggleRelief" role="button" aria-pressed="false" aria-label="Basculer relief">Relief</div>
+
     <div id="legend" role="group" aria-label="Contrôles des couches">
       <label><input id="chkPays" type="checkbox"> Limites (Pays)</label>
       <label><input id="chkTrajets" type="checkbox"> Trajets</label>
@@ -99,6 +123,7 @@
   const PATH_COUNTRIES = './countries_10m_new.geojson';
   const PATH_TRAJETS = './ALLLINE_TRAJET_wgs.geojson';
   const PATH_CAPITALS = './capitals.geojson';
+  const PATH_EARTH_BUMP = './elev_bump_4k.jpg';
   const AUTO_ROTATE_SPEED = 0.6;
 
   function loadJSON(url){
@@ -182,7 +207,7 @@
   const globeChart = echarts.init(document.getElementById('globeContainer'), null, { renderer:'webgl' });
   const moonChart  = echarts.init(document.getElementById('moonPreview'), null, { renderer:'webgl' });
 
-  function makeOption({ showPays=false, showTrajets=false, showCapitales=false, isNight=false }) {
+  function makeOption({ showPays=false, showTrajets=false, showCapitales=false, isNight=false, showRelief=false }) {
     const series = [];
     if(showPays){
       series.push({
@@ -225,6 +250,7 @@
       backgroundColor: 'transparent',
       globe: {
         baseTexture: isNight ? nightTexture : dayTexture,
+        heightTexture: (!isNight && showRelief) ? PATH_EARTH_BUMP : undefined,
         shading: 'lambert',
         environment: PATH_STARFIELD,
         atmosphere: { show: true },
@@ -236,7 +262,7 @@
     };
   }
 
-  let state = { showPays:false, showTrajets:false, showCapitales:false, isNight:false };
+  let state = { showPays:false, showTrajets:false, showCapitales:false, isNight:false, showRelief:false };
   globeChart.setOption(makeOption(state));
 
   moonChart.setOption({
@@ -246,13 +272,14 @@
       heightTexture: PATH_MOON_BUMP,
       shading: 'lambert',
       environment: PATH_STARFIELD,
-      light: { main:{ intensity:0.6 }, ambient:{ intensity:0.25 } },
+      light: { main:{ intensity:0.9, alpha: 0, beta: 0 }, ambient:{ intensity:0.1 } },
       viewControl: { autoRotate:true, autoRotateSpeed:1.6, distance:220 }
     },
     series:[]
   });
 
   const toggleEl = document.getElementById('toggle');
+  const toggleReliefEl = document.getElementById('toggleRelief');
   const chkPays = document.getElementById('chkPays');
   const chkTrajets = document.getElementById('chkTrajets');
   const chkCapitales = document.getElementById('chkCapitales');
@@ -263,14 +290,24 @@
     state.showTrajets = chkTrajets.checked;
     state.showCapitales = chkCapitales.checked;
     state.isNight = toggleEl.classList.contains('night');
+    state.showRelief = toggleReliefEl.classList.contains('active');
     globeChart.setOption(makeOption(state), { notMerge:true });
   }
 
   toggleEl.addEventListener('click', ()=>{
     toggleEl.classList.toggle('night');
     toggleEl.setAttribute('aria-pressed', String(toggleEl.classList.contains('night')));
+    if(state.isNight){
+      toggleReliefEl.classList.remove('active'); // enlève relief en mode nuit
+    }
     refreshFromUI();
   });
+
+  toggleReliefEl.addEventListener('click', ()=>{
+    toggleReliefEl.classList.toggle('active');
+    refreshFromUI();
+  });
+
   chkPays.addEventListener('change', refreshFromUI);
   chkTrajets.addEventListener('change', refreshFromUI);
   chkCapitales.addEventListener('change', refreshFromUI);
