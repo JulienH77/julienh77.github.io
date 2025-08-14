@@ -136,7 +136,7 @@
   const PATH_COUNTRIES = './countries_10m_new.geojson';
   const PATH_TRAJETS = './ALLLINE_TRAJET_wgs.geojson';
   const PATH_CAPITALS = './capitals.geojson';
-  const PATH_EARTH_BUMP = './elev_bump_4k.jpg';
+  const PATH_EARTH_BUMP = './world.topo.bathy.200401.jpg';
   const AUTO_ROTATE_SPEED = 0.6;
 
   function loadJSON(url){
@@ -264,6 +264,7 @@
       globe: {
         baseTexture: isNight ? nightTexture : dayTexture,
         heightTexture: (!isNight && showRelief) ? PATH_EARTH_BUMP : undefined,
+        displacementScale: 0.02,
         shading: 'lambert',
         environment: PATH_STARFIELD,
         atmosphere: { show: true },
