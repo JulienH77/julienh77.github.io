@@ -290,79 +290,78 @@ document.getElementById('expandTrajets').addEventListener('click', () => {
   const globeChart = echarts.init(document.getElementById('globeContainer'), null, { renderer:'webgl' });
   const moonChart  = echarts.init(document.getElementById('moonPreview'), null, { renderer:'webgl' });
   
-  function makeOption(s) {
-    const series = [];
-    if(s.showPays){
-      series.push({
-        name:'Pays',
-        type:'lines3D',
-        coordinateSystem:'globe',
-        polyline:true,
-        data: countryLines,
-        lineStyle:{ color:'#f0f0f0', width:1, opacity:0.98 }
-      });
-    }
-if(s.showTrajets){
-  const filteredTrajets = trajetLines.filter(t =>
-    state.visibleTrajets.has(t.properties?.nom || t.properties?.trajet || 'Sans nom')
-  );
-  series.push({
-    name:'Trajets',
-    type:'lines3D',
-    coordinateSystem:'globe',
-    polyline:true,
-    data: filteredTrajets
-  });
+function makeOption(s) {
+  const series = [];
+  if(s.showPays){
+    series.push({
+      name:'Pays',
+      type:'lines3D',
+      coordinateSystem:'globe',
+      polyline:true,
+      data: countryLines,
+      lineStyle:{ color:'#f0f0f0', width:1, opacity:0.98 }
+    });
+  }
+  if(s.showTrajets){
+    const filteredTrajets = trajetLines.filter(t =>
+      state.visibleTrajets.has(t.properties?.nom || t.properties?.trajet || 'Sans nom')
+    );
+    series.push({
+      name:'Trajets',
+      type:'lines3D',
+      coordinateSystem:'globe',
+      polyline:true,
+      data: filteredTrajets
+    });
+  }
+  if(s.showCapitales){
+    series.push({
+      name:'Capitales',
+      type:'scatter3D',
+      coordinateSystem:'globe',
+      symbol:'rect',
+      symbolSize:6,
+      itemStyle:{ color:'#ffffff', borderColor:'#000', borderWidth:1 },
+      label:{
+        show:true,
+        formatter: p => p.name || (p.data && (p.data.city||'')) || '',
+        position:'top',
+        distance: 2,
+        textStyle:{ fontSize: 10, color:'#ffffff', backgroundColor:'rgba(0,0,0,0.35)', padding:[2,4], borderRadius:3 }
+      },
+      data: capitalPoints
+    });
+  }
+
+  const baseDay = (s.dayBase === 'earth') ? PATH_EARTH_DAY_1 : PATH_EARTH_DAY_2;
+  const layers = [
+    { type:'blend', blendTo:'emission', texture: PATH_EARTH_NIGHT_RAW, intensity: 1 }
+  ];
+  if(s.showNuages){
+    layers.push({ type:'overlay', texture: CLOUDS, shading: 'lambert', distance: 1 });
+  }
+
+  return {
+    backgroundColor: 'transparent',
+    globe: {
+      baseTexture: baseDay,
+      heightTexture: s.showRelief ? PATH_EARTH_BUMP : undefined,
+      displacementScale: 0.025,
+      shading: 'realistic',
+      environment: PATH_STARFIELD,
+      postEffect: { enable : false},
+      light: {
+        ambient: { color: '#1f1f1f', intensity: 0.2 },
+        main: { color: '#FFFDED', intensity: 1.0, alpha: 0, beta: s.isNight ? 180 : 0 }
+      },
+      atmosphere:{show:true, color: '#a1a1a1', offset:4},
+      viewControl: { autoRotate: false, autoRotateSpeed:0.5 },
+      layers
+    },
+    series
+  };
 }
 
-    if(s.showCapitales){
-      series.push({
-        name:'Capitales',
-        type:'scatter3D',
-        coordinateSystem:'globe',
-        symbol:'rect',                 // carrés
-        symbolSize:6,
-        itemStyle:{ color:'#ffffff', borderColor:'#000', borderWidth:1 },
-        label:{
-          show:true,                   // affichage permanent
-          formatter: p => p.name || (p.data && (p.data.city||'')) || '',
-          position:'top',
-          distance: 2,
-          textStyle:{ fontSize: 10, color:'#ffffff', backgroundColor:'rgba(0,0,0,0.35)', padding:[2,4], borderRadius:3 }
-        },
-        data: capitalPoints
-      });
-    }
-
-    const layers = [];
-    // Ombre de nuit uniquement en mode jour
-    /*if(!s.isNight){
-      layers.push({ show:true, name:'Ombre nuit', type:'blend', intensity: 1, blendTo: 'emission', texture: PATH_EARTH_NIGHT_RAW });
-    }*/
-    // Nuages via bouton
-    if(s.showNuages){
-      layers.push({ show:true, name:'Nuages', type:'overlay', texture: CLOUDS, shading: 'lambert', distance: 1 });
-    }
-
-    const baseDay = (s.dayBase === 'earth') ? PATH_EARTH_DAY_1 : PATH_EARTH_DAY_2;
-
-    return {
-      backgroundColor: 'transparent',
-      globe: {
-        baseTexture: s.isNight ? nightTexture : baseDay,
-        heightTexture:  s.showRelief ? PATH_EARTH_BUMP : undefined,
-        displacementScale: 0.025,
-        shading: s.isNight ? 'lambert' : 'realistic',
-        environment: PATH_STARFIELD,
-        postEffect: { enable : false},
-        light: { ambient: {color: '#1f1f1f', intensity: s.isNight ? 10 : 0.2}, main: {color: '#FFFDED', intensity: s.isNight ? -5 : 0.9} },
-        atmosphere:{show:true, color: '#a1a1a1', offset:4},
-        viewControl: { autoRotate: false, autoRotateSpeed:0.5, /*minDistance: 50, maxDistance: 600, zoomSensitivity: 2, rotateSensitivity: 2*/ },
-        layers
-      },
-      series
-    };
-  }
 
   function refresh(){ globeChart.setOption(makeOption(state), { notMerge:true }); }
 
@@ -383,6 +382,7 @@ if(s.showTrajets){
     toggleEl.setAttribute('aria-pressed', String(state.isNight));
     refresh();
   });
+
 
   toggleReliefEl.addEventListener('click', ()=>{
     state.showRelief = !state.showRelief;
