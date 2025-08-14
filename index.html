@@ -278,27 +278,9 @@
     displacementScale: 0.2,
     shading: 'lambert',
     environment: PATH_STARFIELD,
-    light: {
-      ambient: {
-        intensity: 0.1
-      },
-      main: {
-        intensity: 1.5
-      }
-    },
-    layers: [
-      {
-        type: 'blend',
-        blendTo: 'emission',
-        texture: nightTexture
-      },
-      {
-        type: 'overlay',
-        shading: 'lambert',
-        distance: 5
-      }
-    ]
-  },
+    light: {ambient: {intensity: 0.1 }, main: { intensity: 1.5 } },
+    layers: [  { type: 'blend',blendTo: 'emission', texture: nightTexture }]},
+      
       series
     };
   }
