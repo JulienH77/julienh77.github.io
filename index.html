@@ -75,7 +75,7 @@
   #toggleClouds.active { background: rgba(180,220,255,0.9); }
   #toggleClouds:active { transform: scale(0.95); }
 
-  /* Bouton carré fond du jour (en bas à gauche) */
+  /* Bouton carré fond du jour */
   #toggleDayBase {
     position: absolute;
     left: 18px;
@@ -124,60 +124,30 @@
     display:none; z-index:200;
   }
 </style>
-
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
 </head>
 <body>
 <div id="root">
   <div id="globeContainer" class="echarts-for-globe"></div>
-
-  <!-- Bouton jour/nuit -->
-  <div id="toggle" role="button" aria-pressed="false" aria-label="Basculer jour/nuit">
-    <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="#FFD43B"/></svg>
-    <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 0112.21 3 7 7 0 1021 12.79z" fill="#FFDD66"/></svg>
-    <div class="ball" aria-hidden="true"></div>
-  </div>
-
-  <!-- Bouton relief -->
-  <div id="toggleRelief" role="button" aria-pressed="false" aria-label="Basculer relief">
-    <svg viewBox="0 0 24 24">
-      <path d="M3 20l5-9 4 7 5-10 5 12z" fill="#444"/>
-      <path d="M3 20h18v1H3z" fill="#777"/>
-    </svg>
-  </div>
-
-  <!-- Nouveau : Bouton nuages -->
-  <div id="toggleClouds" role="button" aria-pressed="true" aria-label="Afficher/masquer les nuages" class="active">
-    <svg viewBox="0 0 24 24" width="22" height="22">
-      <path d="M6 19h11a4 4 0 0 0 0-8 5 5 0 0 0-9.8-1.7A4 4 0 0 0 6 19z" fill="#4a90e2"/>
-    </svg>
-  </div>
-
-  <!-- Nouveau : Bouton carré pour changer le fond du jour -->
-  <div id="toggleDayBase" role="button" aria-label="Changer fond du jour" title="Changer fond du jour">
-    EARTH
-  </div>
-
-  <div id="legend" role="group" aria-label="Contrôles des couches">
+  <div id="toggle" role="button"><svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="#FFD43B"/></svg><svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 0112.21 3 7 7 0 1021 12.79z" fill="#FFDD66"/></svg><div class="ball"></div></div>
+  <div id="toggleRelief"><svg viewBox="0 0 24 24"><path d="M3 20l5-9 4 7 5-10 5 12z" fill="#444"/><path d="M3 20h18v1H3z" fill="#777"/></svg></div>
+  <div id="toggleClouds" class="active"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M6 19h11a4 4 0 0 0 0-8 5 5 0 0 0-9.8-1.7A4 4 0 0 0 6 19z" fill="#4a90e2"/></svg></div>
+  <div id="toggleDayBase">EARTH</div>
+  <div id="legend">
     <label><input id="chkPays" type="checkbox"> Limites (Pays)</label>
-    <label id="trajetsLabel">
-      <input id="chkTrajets" type="checkbox"> Trajets
-      <button type="button" id="expandTrajets" aria-label="Voir détails">▼</button>
-    </label>
+    <label id="trajetsLabel"><input id="chkTrajets" type="checkbox"> Trajets <button type="button" id="expandTrajets">▼</button></label>
     <div id="trajetList" style="margin-left:20px; display:none;"></div>
-
     <label><input id="chkCapitales" type="checkbox"> Capitales</label>
   </div>
-
-  <div id="moonPreview" title="Aperçu Lune"></div>
+  <div id="moonPreview"></div>
   <div id="trajetPopup"></div>
 </div>
 
 <script>
 (async function(){
   const PATH_EARTH_DAY_1 = './earth.jpg';
-  const PATH_EARTH_DAY_2 = './world.topo.bathy.200401.jpg';  // alternative "fond jour"
+  const PATH_EARTH_DAY_2 = './world.topo.bathy.200401.jpg';
   const CLOUDS = './clouds.png';
   const PATH_EARTH_NIGHT_RAW = './night.jpg';
   const PATH_STARFIELD = './starfield.jpg';
@@ -188,176 +158,91 @@
   const PATH_CAPITALS = './capitals.geojson';
   const PATH_EARTH_BUMP = './world.topo.bathy.200401.jpg';
 
-  const loadJSON = url => fetch(url).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
-  const loadImage = url => new Promise((res, rej) => { const img = new Image(); img.crossOrigin = 'anonymous'; img.onload = ()=>res(img); img.onerror = rej; img.src = url; });
+  const loadJSON = url => fetch(url).then(r=>r.json());
   const normalizeLng = lng => ((lng + 180) % 360) - 180;
 
-  const linesFromPolygonGeom = geom => {
+  const linesFromPolygonGeom = g => {
     const out = [];
-    if(!geom) return out;
-    if(geom.type === 'Polygon'){
-      geom.coordinates.forEach(ring => out.push({ coords: ring.map(([x,y]) => [normalizeLng(x), y, 0.001]) }));
-    } else if(geom.type === 'MultiPolygon'){
-      geom.coordinates.forEach(poly => poly.forEach(ring => out.push({ coords: ring.map(([x,y]) => [normalizeLng(x), y, 0.001]) })));
-    }
+    if(g?.type === 'Polygon') g.coordinates.forEach(r => out.push({ coords: r.map(([x,y])=>[normalizeLng(x),y,0.001]) }));
+    if(g?.type === 'MultiPolygon') g.coordinates.forEach(p => p.forEach(r => out.push({ coords: r.map(([x,y])=>[normalizeLng(x),y,0.001]) })));
+    return out;
+  };
+  const extractLinesFromFeature = f => {
+    const out = [];
+    if(!f.geometry) return out;
+    if(f.geometry.type === 'LineString') out.push({ coords: f.geometry.coordinates.map(([x,y])=>[normalizeLng(x),y]) });
+    if(f.geometry.type === 'MultiLineString') f.geometry.coordinates.forEach(l => out.push({ coords: l.map(([x,y])=>[normalizeLng(x),y]) }));
+    if(f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon') out.push(...linesFromPolygonGeom(f.geometry));
     return out;
   };
 
-  const extractLinesFromFeature = feature => {
-    const out = [], g = feature && feature.geometry;
-    if(!g) return out;
-    if(g.type === 'LineString'){
-      out.push({ coords: g.coordinates.map(([x,y]) => [normalizeLng(x), y]) });
-    } else if(g.type === 'MultiLineString'){
-      g.coordinates.forEach(lineCoords => out.push({ coords: lineCoords.map(([x,y]) => [normalizeLng(x), y]) }));
-    } else if(g.type === 'Polygon' || g.type === 'MultiPolygon'){
-      linesFromPolygonGeom(g).forEach(l => out.push(l));
-    }
-    return out;
-  };
-
-  // texture nuit (on garde telle quelle)
-  const nightTexture = (await loadImage(PATH_EARTH_NIGHT_RAW)).src;
-
-  // chargement des données
   const [countriesGeo, trajetsGeo, capitalsGeo] = await Promise.all([
     loadJSON(PATH_COUNTRIES),
     loadJSON(PATH_TRAJETS),
     loadJSON(PATH_CAPITALS)
   ]);
 
-  // frontières
   const countryLines = [];
-  (countriesGeo.features || []).forEach(f => linesFromPolygonGeom(f.geometry).forEach(l => countryLines.push(l)));
+  countriesGeo.features.forEach(f => countryLines.push(...linesFromPolygonGeom(f.geometry)));
 
-  // trajets
-const trajetLines = [];
-const mapColor = { avion:'#0da2ff', train:'#ee0020', bus:'#009c27', voiture:'#900dff' };
-(trajetsGeo.features || []).forEach(f => {
-  const col = mapColor[(f.properties?.trajet || f.properties?.transport || '').toLowerCase()] || '#00ffff';
-  extractLinesFromFeature(f).forEach(l => trajetLines.push({ ...l, lineStyle:{ color: col, width: 3, opacity: 0.95 }, properties:f.properties }));
-});
+  const mapColor = { avion:'#0da2ff', train:'#ee0020', bus:'#009c27', voiture:'#900dff' };
+  const trajetLines = trajetsGeo.features.flatMap(f =>
+    extractLinesFromFeature(f).map(l => ({
+      ...l,
+      lineStyle:{ color: mapColor[f.properties?.trajet?.toLowerCase()] || '#00ffff', width:3, opacity:0.95 },
+      properties: f.properties
+    }))
+  );
 
-// Liste unique des noms de trajets
-const trajetNames = [...new Set(
-  trajetLines.map(t => t.properties?.nom || t.properties?.trajet || 'Sans nom')
-)];
+  const trajetNames = [...new Set(trajetLines.map(t => t.properties?.nom || t.properties?.trajet || 'Sans nom'))];
 
-// état UI
-let state = {
-  showPays:false,
-  showTrajets:false,
-  showCapitales:false,
-  showNuages:true,
-  isNight:false,
-  showRelief:false,
-  dayBase:'earth',
-  visibleTrajets: new Set(trajetNames) // ajouté ici
-};
+  let state = { showPays:false, showTrajets:false, showCapitales:false, showNuages:true, showRelief:false, dayBase:'earth', isNight:false, visibleTrajets:new Set(trajetNames) };
 
-// --- construction sous-liste dans la légende ---
-const trajetListEl = document.getElementById('trajetList');
-trajetNames.forEach(name => {
-  const id = 'trajet_' + name.replace(/\s+/g, '_');
-  const div = document.createElement('div');
-  div.innerHTML = `<label><input type="checkbox" id="${id}" checked> ${name}</label>`;
-  trajetListEl.appendChild(div);
-  document.getElementById(id).addEventListener('change', e => {
-    if (e.target.checked) {
-      state.visibleTrajets.add(name);
-    } else {
-      state.visibleTrajets.delete(name);
-    }
-    refresh();
+  const trajetListEl = document.getElementById('trajetList');
+  trajetNames.forEach(name=>{
+    const id = 'trajet_' + name.replace(/\s+/g,'_');
+    const div = document.createElement('div');
+    div.innerHTML = `<label><input type="checkbox" id="${id}" checked> ${name}</label>`;
+    trajetListEl.appendChild(div);
+    document.getElementById(id).addEventListener('change', e=>{
+      if(e.target.checked) state.visibleTrajets.add(name); else state.visibleTrajets.delete(name);
+      refresh();
+    });
   });
-});
+  document.getElementById('expandTrajets').addEventListener('click', ()=>trajetListEl.style.display = trajetListEl.style.display==='none'?'block':'none');
 
-// Bouton pour déplier/replier
-document.getElementById('expandTrajets').addEventListener('click', () => {
-  trajetListEl.style.display = trajetListEl.style.display === 'none' ? 'block' : 'none';
-});
-
-
-  
-
-  // capitales (on stocke le champ city en name)
-  const capitalPoints = (capitalsGeo.features || []).map(f => {
+  const capitalPoints = capitalsGeo.features.map(f=>{
     const [x,y] = f.geometry.coordinates;
-    const city = f.properties?.city || '';
-    return { name: city, value: [normalizeLng(x), y, 0], city };
+    return { name: f.properties?.city||'', value:[normalizeLng(x),y,0] };
   });
 
   const globeChart = echarts.init(document.getElementById('globeContainer'), null, { renderer:'webgl' });
   const moonChart  = echarts.init(document.getElementById('moonPreview'), null, { renderer:'webgl' });
-  
+
   function makeOption(s) {
     const series = [];
-    if(s.showPays){
-      series.push({
-        name:'Pays',
-        type:'lines3D',
-        coordinateSystem:'globe',
-        polyline:true,
-        data: countryLines,
-        lineStyle:{ color:'#f0f0f0', width:1, opacity:0.98 }
-      });
-    }
-if(s.showTrajets){
-  const filteredTrajets = trajetLines.filter(t =>
-    state.visibleTrajets.has(t.properties?.nom || t.properties?.trajet || 'Sans nom')
-  );
-  series.push({
-    name:'Trajets',
-    type:'lines3D',
-    coordinateSystem:'globe',
-    polyline:true,
-    data: filteredTrajets
-  });
-}
-
-    if(s.showCapitales){
-      series.push({
-        name:'Capitales',
-        type:'scatter3D',
-        coordinateSystem:'globe',
-        symbol:'rect',                 // carrés
-        symbolSize:6,
-        itemStyle:{ color:'#ffffff', borderColor:'#000', borderWidth:1 },
-        label:{
-          show:true,                   // affichage permanent
-          formatter: p => p.name || (p.data && (p.data.city||'')) || '',
-          position:'top',
-          distance: 2,
-          textStyle:{ fontSize: 10, color:'#ffffff', backgroundColor:'rgba(0,0,0,0.35)', padding:[2,4], borderRadius:3 }
-        },
-        data: capitalPoints
-      });
-    }
-
-    const layers = [];
-    // Ombre de nuit uniquement en mode jour
-    /*if(!s.isNight){
-      layers.push({ show:true, name:'Ombre nuit', type:'blend', intensity: 1, blendTo: 'emission', texture: PATH_EARTH_NIGHT_RAW });
-    }*/
-    // Nuages via bouton
-    if(s.showNuages){
-      layers.push({ show:true, name:'Nuages', type:'overlay', texture: CLOUDS, shading: 'lambert', distance: 1 });
-    }
+    if(s.showPays) series.push({ name:'Pays', type:'lines3D', coordinateSystem:'globe', polyline:true, data:countryLines, lineStyle:{ color:'#f0f0f0', width:1, opacity:0.98 } });
+    if(s.showTrajets) series.push({ name:'Trajets', type:'lines3D', coordinateSystem:'globe', polyline:true, data: trajetLines.filter(t=>state.visibleTrajets.has(t.properties?.nom || t.properties?.trajet || 'Sans nom')) });
+    if(s.showCapitales) series.push({ name:'Capitales', type:'scatter3D', coordinateSystem:'globe', symbol:'rect', symbolSize:6, itemStyle:{ color:'#fff', borderColor:'#000', borderWidth:1 }, label:{ show:true, formatter:p=>p.name, position:'top', distance:2, textStyle:{ fontSize:10, color:'#fff', backgroundColor:'rgba(0,0,0,0.35)', padding:[2,4], borderRadius:3 } }, data:capitalPoints });
 
     const baseDay = (s.dayBase === 'earth') ? PATH_EARTH_DAY_1 : PATH_EARTH_DAY_2;
+    const layers = [
+      { type:'blend', blendTo:'emission', texture: PATH_EARTH_NIGHT_RAW, intensity:1 }
+    ];
+    if(s.showNuages) layers.push({ type:'overlay', texture:CLOUDS, shading:'lambert', distance:1 });
 
     return {
       backgroundColor: 'transparent',
       globe: {
-        baseTexture: s.isNight ? nightTexture : baseDay,
-        heightTexture:  s.showRelief ? PATH_EARTH_BUMP : undefined,
+        baseTexture: baseDay,
+        heightTexture: s.showRelief ? PATH_EARTH_BUMP : undefined,
         displacementScale: 0.025,
-        shading: s.isNight ? 'lambert' : 'realistic',
+        shading: 'realistic',
         environment: PATH_STARFIELD,
-        postEffect: { enable : false},
-        light: { ambient: {color: '#1f1f1f', intensity: s.isNight ? 10 : 0.2}, main: {color: '#FFFDED', intensity: s.isNight ? -5 : 0.9} },
-        atmosphere:{show:true, color: '#a1a1a1', offset:4},
-        viewControl: { autoRotate: false, autoRotateSpeed:0.5, /*minDistance: 50, maxDistance: 600, zoomSensitivity: 2, rotateSensitivity: 2*/ },
+        postEffect: { enable:false },
+        light: { ambient:{ intensity:0.2 }, main:{ intensity:1.0, alpha:0, beta: s.isNight ? 180 : 0 } },
+        atmosphere:{ show:true, color:'#a1a1a1', offset:4 },
+        viewControl: { autoRotate:false, autoRotateSpeed:0.5 },
         layers
       },
       series
@@ -366,79 +251,40 @@ if(s.showTrajets){
 
   function refresh(){ globeChart.setOption(makeOption(state), { notMerge:true }); }
 
-  // --- UI refs ---
-  const toggleEl = document.getElementById('toggle');
-  const toggleReliefEl = document.getElementById('toggleRelief');
-  const toggleCloudsEl = document.getElementById('toggleClouds');
-  const toggleDayBaseEl = document.getElementById('toggleDayBase');
-  const chkPays = document.getElementById('chkPays');
-  const chkTrajets = document.getElementById('chkTrajets');
-  const chkCapitales = document.getElementById('chkCapitales');
-  const popupEl = document.getElementById('trajetPopup');
-
-  // --- événements ---
-  toggleEl.addEventListener('click', ()=>{
+  document.getElementById('toggle').addEventListener('click', ()=>{
     state.isNight = !state.isNight;
-    toggleEl.classList.toggle('night', state.isNight);
-    toggleEl.setAttribute('aria-pressed', String(state.isNight));
+    document.getElementById('toggle').classList.toggle('night', state.isNight);
     refresh();
   });
-
-  toggleReliefEl.addEventListener('click', ()=>{
+  document.getElementById('toggleRelief').addEventListener('click', ()=>{
     state.showRelief = !state.showRelief;
-    toggleReliefEl.classList.toggle('active', state.showRelief);
-    toggleReliefEl.setAttribute('aria-pressed', String(state.showRelief));
+    document.getElementById('toggleRelief').classList.toggle('active', state.showRelief);
     refresh();
   });
-
-  // nouveau : bouton nuages
-  toggleCloudsEl.addEventListener('click', ()=>{
+  document.getElementById('toggleClouds').addEventListener('click', ()=>{
     state.showNuages = !state.showNuages;
-    toggleCloudsEl.classList.toggle('active', state.showNuages);
-    toggleCloudsEl.setAttribute('aria-pressed', String(state.showNuages));
+    document.getElementById('toggleClouds').classList.toggle('active', state.showNuages);
     refresh();
   });
-
-  // nouveau : bouton carré fond jour
-  function updateDayBaseButtonLabel(){
-    toggleDayBaseEl.textContent = (state.dayBase === 'earth') ? 'EARTH' : 'TOPO';
-  }
-  toggleDayBaseEl.addEventListener('click', ()=>{
-    state.dayBase = (state.dayBase === 'earth') ? 'topo' : 'earth';
-    updateDayBaseButtonLabel();
-    refresh();
-  });
+  function updateDayBaseButtonLabel(){ document.getElementById('toggleDayBase').textContent = (state.dayBase === 'earth') ? 'EARTH' : 'TOPO'; }
+  document.getElementById('toggleDayBase').addEventListener('click', ()=>{ state.dayBase = (state.dayBase === 'earth') ? 'topo' : 'earth'; updateDayBaseButtonLabel(); refresh(); });
   updateDayBaseButtonLabel();
 
-  // légende (nuages retiré ici)
-  [['Pays', chkPays], ['Trajets', chkTrajets], ['Capitales', chkCapitales]].forEach(([name, el])=>{
-    el.addEventListener('change', e=>{
-      state['show'+name] = e.target.checked;
-      refresh();
-    });
+  [['Pays', 'chkPays'], ['Trajets', 'chkTrajets'], ['Capitales', 'chkCapitales']].forEach(([n,id])=>{
+    document.getElementById(id).addEventListener('change', e=>{ state['show'+n] = e.target.checked; refresh(); });
   });
 
-  // clic sur un trajet => popup
-  globeChart.on('click', params => {
-    if(params.seriesName === 'Trajets' && params.data && params.data.properties){
+  globeChart.on('click', params=>{
+    const popupEl = document.getElementById('trajetPopup');
+    if(params.seriesName === 'Trajets' && params.data?.properties){
       const p = params.data.properties;
-      popupEl.innerHTML = `
-        <strong>Trajet:</strong> ${p.trajet || ''}<br/>
-        <strong>Date début:</strong> ${p.date_deb || ''}<br/>
-        <strong>Date fin:</strong> ${p.date_fin || ''}<br/>
-        <strong>Durée:</strong> ${p.duree || ''}<br/>
-        <strong>Distance:</strong> ${p.distanceKM || ''} km
-      `;
+      popupEl.innerHTML = `<strong>Trajet:</strong> ${p.trajet||''}<br/><strong>Date début:</strong> ${p.date_deb||''}<br/><strong>Date fin:</strong> ${p.date_fin||''}<br/><strong>Durée:</strong> ${p.duree||''}<br/><strong>Distance:</strong> ${p.distanceKM||''} km`;
       popupEl.style.display = 'block';
-    } else {
-      popupEl.style.display = 'none';
-    }
+    } else popupEl.style.display = 'none';
   });
 
-  // rendu initial
   refresh();
 
-  // lune
   moonChart.setOption({
     backgroundColor: 'transparent',
     globe: {
@@ -446,12 +292,11 @@ if(s.showTrajets){
       heightTexture: PATH_MOON_BUMP,
       shading: 'lambert',
       environment: PATH_STARFIELD,
-      light: { main:{ intensity:0.9, alpha: 0, beta: 0 }, ambient:{ intensity:0.1 } },
+      light: { main:{ intensity:0.9 }, ambient:{ intensity:0.1 } },
       viewControl: { autoRotate:true, autoRotateSpeed:1.6, distance:220 }
     },
     series:[]
   });
-
 })();
 </script>
 </body>
