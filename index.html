@@ -1,419 +1,177 @@
-<!doctype html>
-<html lang="fr">
+<!DOCTYPE html>
+<html>
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Globe — jour / nuit / légende / lune</title>
-<style>
-  html,body,#root { height:100%; margin:0; padding:0; }
-  body{
-    background: url('./starfield.jpg') no-repeat center center fixed;
-    background-size: cover;
-    font-family: Inter, Arial, sans-serif;
-  }
-  #root { position:relative; width:100%; height:100%; overflow:hidden; }
-  #globeContainer { width:100%; height:100%; }
-
-  /* Toggle jour/nuit */
-  #toggle {
-    position:absolute; top:14px; left:14px;
-    width:100px; height:40px; border-radius:22px;
-    display:flex; align-items:center; justify-content:space-between;
-    padding:4px 8px; cursor:pointer; z-index:120; user-select:none;
-    background: linear-gradient(90deg,#ffe066 50%, #4a90e2 50%);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-  }
-  #toggle.night { background: linear-gradient(90deg,#4a90e2 50%, #ffe066 50%); }
-  #toggle .ball {
-    position:absolute; top:4px; left:4px;
-    width:32px; height:32px; border-radius:50%;
-    background:#ffd54a;
-    box-shadow:0 6px 16px rgba(255,213,74,0.28);
-    transition:left .28s, background .28s;
-  }
-  #toggle.night .ball { left:64px; background:#f1d56d; }
-
-  /* Toggle relief (rond) */
-  #toggleRelief {
-    position: absolute;
-    top: 80px;
-    left: 18px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 120;
-    user-select: none;
-    background: rgba(255,255,255,0.9);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-    transition: background 0.2s, transform 0.15s;
-  }
-  #toggleRelief.active { background: rgba(180,255,180,0.9); }
-  #toggleRelief:active { transform: scale(0.95); }
-
-  /* Toggle nuages (rond) */
-  #toggleClouds {
-    position: absolute;
-    top: 134px;
-    left: 18px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 120;
-    user-select: none;
-    background: rgba(255,255,255,0.9);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-    transition: background 0.2s, transform 0.15s;
-  }
-  #toggleClouds.active { background: rgba(180,220,255,0.9); }
-  #toggleClouds:active { transform: scale(0.95); }
-
-  /* Bouton carré fond du jour (en bas à gauche) */
-  #toggleDayBase {
-    position: absolute;
-    left: 18px;
-    bottom: 18px;
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 120;
-    user-select: none;
-    background: rgba(255,255,255,0.95);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-    font-weight: 700;
-    font-size: 12px;
-    text-align: center;
-    line-height: 1.1;
-  }
-  #toggleDayBase:active { transform: scale(0.97); }
-
-  /* Légende */
-  #legend {
-    position:absolute; top:14px; right:14px; z-index:120;
-    background: rgba(255,255,255,0.92);
-    padding:10px 12px; border-radius:10px;
-    min-width:160px; box-shadow:0 6px 18px rgba(0,0,0,0.18);
-  }
-  #legend label { display:flex; align-items:center; gap:10px; font-weight:600; }
-  #legend input[type=checkbox] { width:16px; height:16px; }
-
-  /* Lune */
-  #moonPreview {
-    position:absolute; bottom:14px; right:14px;
-    width:140px; height:140px; z-index:110; border-radius:50%;
-    overflow:hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.6); background:black;
-  }
-
-  /* Popup stats */
-  #trajetPopup {
-    position:absolute; bottom:20px; left:20px;
-    background:rgba(0,0,0,0.85); color:white;
-    padding:10px 14px; border-radius:8px;
-    font-size:14px; line-height:1.4; max-width:300px;
-    display:none; z-index:200;
-  }
-</style>
-
+<meta charset="utf-8">
+<title>Globe avec Relief, Nuages, Capitales et Échelle</title>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
+<style>
+  body { margin:0; overflow:hidden; background:#000; }
+  #main { width:100vw; height:100vh; }
+  .control-panel {
+    position:absolute;
+    top:10px;
+    left:10px;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    z-index:1000;
+  }
+  .control-panel button, .control-panel select {
+    padding:5px 10px;
+    background:#fff;
+    border:1px solid #000;
+    cursor:pointer;
+    font-size:14px;
+  }
+  /* Barre d'échelle */
+  .scale-bar {
+    position:absolute;
+    bottom:10px;
+    left:50%;
+    transform:translateX(-50%);
+    width:25%;
+    max-width:250px;
+    height:20px;
+    background:linear-gradient(to right, #fff 0%, #fff 50%, transparent 50%, transparent 100%);
+    background-size:20px 100%;
+    border:1px solid #fff;
+    color:#fff;
+    font-size:12px;
+    text-align:center;
+    line-height:20px;
+    z-index:1000;
+  }
+</style>
 </head>
 <body>
-<div id="root">
-  <div id="globeContainer" class="echarts-for-globe"></div>
-
-  <!-- Bouton jour/nuit -->
-  <div id="toggle" role="button" aria-pressed="false" aria-label="Basculer jour/nuit">
-    <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="#FFD43B"/></svg>
-    <svg class="moon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 0112.21 3 7 7 0 1021 12.79z" fill="#FFDD66"/></svg>
-    <div class="ball" aria-hidden="true"></div>
-  </div>
-
-  <!-- Bouton relief -->
-  <div id="toggleRelief" role="button" aria-pressed="false" aria-label="Basculer relief">
-    <svg viewBox="0 0 24 24">
-      <path d="M3 20l5-9 4 7 5-10 5 12z" fill="#444"/>
-      <path d="M3 20h18v1H3z" fill="#777"/>
-    </svg>
-  </div>
-
-  <!-- Nouveau : Bouton nuages -->
-  <div id="toggleClouds" role="button" aria-pressed="true" aria-label="Afficher/masquer les nuages" class="active">
-    <svg viewBox="0 0 24 24" width="22" height="22">
-      <path d="M6 19h11a4 4 0 0 0 0-8 5 5 0 0 0-9.8-1.7A4 4 0 0 0 6 19z" fill="#4a90e2"/>
-    </svg>
-  </div>
-
-  <!-- Nouveau : Bouton carré pour changer le fond du jour -->
-  <div id="toggleDayBase" role="button" aria-label="Changer fond du jour" title="Changer fond du jour">
-    EARTH
-  </div>
-
-  <div id="legend" role="group" aria-label="Contrôles des couches">
-    <label><input id="chkPays" type="checkbox"> Limites (Pays)</label>
-    <label><input id="chkTrajets" type="checkbox"> Trajets</label>
-    <label><input id="chkCapitales" type="checkbox"> Capitales</label>
-    <!-- (Nuages retiré de la légende, désormais un bouton à gauche) -->
-  </div>
-
-  <div id="moonPreview" title="Aperçu Lune"></div>
-  <div id="trajetPopup"></div>
+<div id="main"></div>
+<div class="control-panel">
+  <button id="toggleDayNight">Mode Nuit</button>
+  <button id="toggleRelief">Relief: OFF</button>
+  <button id="toggleClouds">Nuages: ON</button>
+  <select id="dayTextureSelect">
+    <option value="earth.jpg">earth.jpg</option>
+    <option value="world.topo.bathy.200401.jpg">world.topo.bathy.200401.jpg</option>
+  </select>
 </div>
+<div class="scale-bar">1000 km</div>
 
 <script>
-(async function(){
-  const PATH_EARTH_DAY_1 = './earth.jpg';
-  const PATH_EARTH_DAY_2 = './world.topo.bathy.200401.jpg';  // alternative "fond jour"
-  const CLOUDS = './clouds.png';
-  const PATH_EARTH_NIGHT_RAW = './night.jpg';
-  const PATH_STARFIELD = './starfield.jpg';
-  const PATH_MOON_BASE = './moon-base.jpg';
-  const PATH_MOON_BUMP = './moon-bump.jpg';
-  const PATH_COUNTRIES = './countries_10m_new.geojson';
-  const PATH_TRAJETS = './ALLLINE_TRAJET_wgs.geojson';
-  const PATH_CAPITALS = './capitals.geojson';
-  const PATH_EARTH_BUMP = './world.topo.bathy.200401.jpg';
+const PATH_STARFIELD = 'starfield.jpg';
+const PATH_EARTH_NIGHT = 'earth_night.jpg';
+const PATH_EARTH_DAY_1 = 'earth.jpg';
+const PATH_EARTH_DAY_2 = 'world.topo.bathy.200401.jpg';
+const PATH_EARTH_BUMP = 'earth_bump.jpg';
+const PATH_CLOUDS = 'clouds.png';
 
-  const loadJSON = url => fetch(url).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
-  const loadImage = url => new Promise((res, rej) => { const img = new Image(); img.crossOrigin = 'anonymous'; img.onload = ()=>res(img); img.onerror = rej; img.src = url; });
-  const normalizeLng = lng => ((lng + 180) % 360) - 180;
+let s = {
+  isNight: false,
+  showRelief: false,
+  showClouds: true,
+  dayTextureChoice: PATH_EARTH_DAY_1
+};
 
-  const linesFromPolygonGeom = geom => {
-    const out = [];
-    if(!geom) return out;
-    if(geom.type === 'Polygon'){
-      geom.coordinates.forEach(ring => out.push({ coords: ring.map(([x,y]) => [normalizeLng(x), y, 0.001]) }));
-    } else if(geom.type === 'MultiPolygon'){
-      geom.coordinates.forEach(poly => poly.forEach(ring => out.push({ coords: ring.map(([x,y]) => [normalizeLng(x), y, 0.001]) })));
+const chart = echarts.init(document.getElementById('main'));
+
+let layers = [
+  { type: 'blend', blendTo: 'emission', texture: PATH_CLOUDS, intensity: 1 }
+];
+
+function updateLayers() {
+  if (s.showClouds) {
+    if (!layers.find(l => l.texture === PATH_CLOUDS)) {
+      layers.push({ type: 'blend', blendTo: 'emission', texture: PATH_CLOUDS, intensity: 1 });
     }
-    return out;
-  };
-
-  const extractLinesFromFeature = feature => {
-    const out = [], g = feature && feature.geometry;
-    if(!g) return out;
-    if(g.type === 'LineString'){
-      out.push({ coords: g.coordinates.map(([x,y]) => [normalizeLng(x), y]) });
-    } else if(g.type === 'MultiLineString'){
-      g.coordinates.forEach(lineCoords => out.push({ coords: lineCoords.map(([x,y]) => [normalizeLng(x), y]) }));
-    } else if(g.type === 'Polygon' || g.type === 'MultiPolygon'){
-      linesFromPolygonGeom(g).forEach(l => out.push(l));
-    }
-    return out;
-  };
-
-  // texture nuit (on garde telle quelle)
-  const nightTexture = (await loadImage(PATH_EARTH_NIGHT_RAW)).src;
-
-  // chargement des données
-  const [countriesGeo, trajetsGeo, capitalsGeo] = await Promise.all([
-    loadJSON(PATH_COUNTRIES),
-    loadJSON(PATH_TRAJETS),
-    loadJSON(PATH_CAPITALS)
-  ]);
-
-  // frontières
-  const countryLines = [];
-  (countriesGeo.features || []).forEach(f => linesFromPolygonGeom(f.geometry).forEach(l => countryLines.push(l)));
-
-  // trajets
-  const trajetLines = [];
-  const mapColor = { avion:'#0da2ff', train:'#ee0020', bus:'#009c27', voiture:'#900dff' };
-  (trajetsGeo.features || []).forEach(f => {
-    const col = mapColor[(f.properties?.trajet || f.properties?.transport || '').toLowerCase()] || '#00ffff';
-    extractLinesFromFeature(f).forEach(l => trajetLines.push({ ...l, lineStyle:{ color: col, width: 3, opacity: 0.95 }, properties:f.properties }));
-  });
-
-  // capitales (on stocke le champ city en name)
-  const capitalPoints = (capitalsGeo.features || []).map(f => {
-    const [x,y] = f.geometry.coordinates;
-    const city = f.properties?.city || '';
-    return { name: city, value: [normalizeLng(x), y, 0], city };
-  });
-
-  const globeChart = echarts.init(document.getElementById('globeContainer'), null, { renderer:'webgl' });
-  const moonChart  = echarts.init(document.getElementById('moonPreview'), null, { renderer:'webgl' });
-
-  // état UI (ajout: base du fond jour)
-  let state = {
-    showPays:false,
-    showTrajets:false,
-    showCapitales:false,
-    showNuages:true,
-    isNight:false,
-    showRelief:false,
-    dayBase:'earth' // 'earth' | 'topo'
-  };
-
-  function makeOption(s) {
-    const series = [];
-    if(s.showPays){
-      series.push({
-        name:'Pays',
-        type:'lines3D',
-        coordinateSystem:'globe',
-        polyline:true,
-        data: countryLines,
-        lineStyle:{ color:'#f0f0f0', width:1, opacity:0.98 }
-      });
-    }
-    if(s.showTrajets){
-      series.push({
-        name:'Trajets',
-        type:'lines3D',
-        coordinateSystem:'globe',
-        polyline:true,
-        data: trajetLines
-      });
-    }
-    if(s.showCapitales){
-      series.push({
-        name:'Capitales',
-        type:'scatter3D',
-        coordinateSystem:'globe',
-        symbol:'rect',                 // carrés
-        symbolSize:6,
-        itemStyle:{ color:'#ffffff', borderColor:'#000', borderWidth:1 },
-        label:{
-          show:true,                   // affichage permanent
-          formatter: p => p.name || (p.data && (p.data.city||'')) || '',
-          position:'top',
-          distance: 2,
-          textStyle:{ fontSize: 10, color:'#ffffff', backgroundColor:'rgba(0,0,0,0.35)', padding:[2,4], borderRadius:3 }
-        },
-        data: capitalPoints
-      });
-    }
-
-    const layers = [];
-    // Ombre de nuit uniquement en mode jour
-    if(!s.isNight){
-      layers.push({ show:true, name:'Ombre nuit', type:'blend', intensity: 1, blendTo: 'emission', texture: PATH_EARTH_NIGHT_RAW });
-    }
-    // Nuages via bouton
-    if(s.showNuages){
-      layers.push({ show:true, name:'Nuages', type:'overlay', texture: CLOUDS, shading: 'lambert', distance: 1 });
-    }
-
-    const baseDay = (s.dayBase === 'earth') ? PATH_EARTH_DAY_1 : PATH_EARTH_DAY_2;
-
-    return {
-      backgroundColor: 'transparent',
-      globe: {
-        baseTexture: s.isNight ? nightTexture : baseDay,
-        heightTexture:  s.showRelief ? PATH_EARTH_BUMP : undefined,
-        displacementScale: 0.025,
-        shading: s.isNight ? 'lambert' : 'realistic',
-        environment: PATH_STARFIELD,
-        postEffect: { enable : false},
-        light: { ambient: {color: '#1f1f1f', intensity: 0.2}, main: {color: '#FFFDED', intensity: 0.9} },
-        atmosphere:{show:true, color: '#a1a1a1', offset:4},
-        viewControl: { autoRotate: false, autoRotateSpeed:0.5, /*minDistance: 50, maxDistance: 600, zoomSensitivity: 2, rotateSensitivity: 2*/ },
-        layers
-      },
-      series
-    };
+  } else {
+    layers = layers.filter(l => l.texture !== PATH_CLOUDS);
   }
+}
 
-  function refresh(){ globeChart.setOption(makeOption(state), { notMerge:true }); }
-
-  // --- UI refs ---
-  const toggleEl = document.getElementById('toggle');
-  const toggleReliefEl = document.getElementById('toggleRelief');
-  const toggleCloudsEl = document.getElementById('toggleClouds');
-  const toggleDayBaseEl = document.getElementById('toggleDayBase');
-  const chkPays = document.getElementById('chkPays');
-  const chkTrajets = document.getElementById('chkTrajets');
-  const chkCapitales = document.getElementById('chkCapitales');
-  const popupEl = document.getElementById('trajetPopup');
-
-  // --- événements ---
-  toggleEl.addEventListener('click', ()=>{
-    state.isNight = !state.isNight;
-    toggleEl.classList.toggle('night', state.isNight);
-    toggleEl.setAttribute('aria-pressed', String(state.isNight));
-    refresh();
-  });
-
-  toggleReliefEl.addEventListener('click', ()=>{
-    state.showRelief = !state.showRelief;
-    toggleReliefEl.classList.toggle('active', state.showRelief);
-    toggleReliefEl.setAttribute('aria-pressed', String(state.showRelief));
-    refresh();
-  });
-
-  // nouveau : bouton nuages
-  toggleCloudsEl.addEventListener('click', ()=>{
-    state.showNuages = !state.showNuages;
-    toggleCloudsEl.classList.toggle('active', state.showNuages);
-    toggleCloudsEl.setAttribute('aria-pressed', String(state.showNuages));
-    refresh();
-  });
-
-  // nouveau : bouton carré fond jour
-  function updateDayBaseButtonLabel(){
-    toggleDayBaseEl.textContent = (state.dayBase === 'earth') ? 'EARTH' : 'TOPO';
-  }
-  toggleDayBaseEl.addEventListener('click', ()=>{
-    state.dayBase = (state.dayBase === 'earth') ? 'topo' : 'earth';
-    updateDayBaseButtonLabel();
-    refresh();
-  });
-  updateDayBaseButtonLabel();
-
-  // légende (nuages retiré ici)
-  [['Pays', chkPays], ['Trajets', chkTrajets], ['Capitales', chkCapitales]].forEach(([name, el])=>{
-    el.addEventListener('change', e=>{
-      state['show'+name] = e.target.checked;
-      refresh();
-    });
-  });
-
-  // clic sur un trajet => popup
-  globeChart.on('click', params => {
-    if(params.seriesName === 'Trajets' && params.data && params.data.properties){
-      const p = params.data.properties;
-      popupEl.innerHTML = `
-        <strong>Trajet:</strong> ${p.trajet || ''}<br/>
-        <strong>Date début:</strong> ${p.date_deb || ''}<br/>
-        <strong>Date fin:</strong> ${p.date_fin || ''}<br/>
-        <strong>Durée:</strong> ${p.duree || ''}<br/>
-        <strong>Distance:</strong> ${p.distanceKM || ''} km
-      `;
-      popupEl.style.display = 'block';
-    } else {
-      popupEl.style.display = 'none';
-    }
-  });
-
-  // rendu initial
-  refresh();
-
-  // lune
-  moonChart.setOption({
-    backgroundColor: 'transparent',
+function getGlobeOption(series) {
+  updateLayers();
+  return {
     globe: {
-      baseTexture: PATH_MOON_BASE,
-      heightTexture: PATH_MOON_BUMP,
-      shading: 'lambert',
+      baseTexture: s.isNight ? PATH_EARTH_NIGHT : s.dayTextureChoice,
+      heightTexture: s.showRelief ? PATH_EARTH_BUMP : undefined,
+      displacementScale: 0.025,
+      shading: s.isNight ? 'lambert' : 'realistic',
       environment: PATH_STARFIELD,
-      light: { main:{ intensity:0.9, alpha: 0, beta: 0 }, ambient:{ intensity:0.1 } },
-      viewControl: { autoRotate:true, autoRotateSpeed:1.6, distance:220 }
+      postEffect: { enable: false },
+      light: { ambient: { color: '#1f1f1f', intensity: 0.2 }, main: { color: '#FFFDED', intensity: 0.9 } },
+      atmosphere: { show: true, color: '#a1a1a1', offset: 4 },
+      viewControl: { autoRotate: false, autoRotateSpeed: 0.5 },
+      layers: layers
     },
-    series:[]
-  });
+    series: series
+  };
+}
 
-})();
+// Charger GeoJSON
+Promise.all([
+  fetch('world.geojson').then(r => r.json()),
+  fetch('capitales.geojson').then(r => r.json())
+]).then(([worldGeo, capitalsGeo]) => {
+  echarts.registerMap('world', worldGeo);
+
+  const capitalsData = capitalsGeo.features.map(f => ({
+    name: f.properties.city,
+    value: [f.geometry.coordinates[0], f.geometry.coordinates[1], 0] // altitude fixe
+  }));
+
+  const series = [
+    {
+      type: 'map3D',
+      map: 'world',
+      shading: 'realistic',
+      realisticMaterial: { roughness: 0.8 },
+      label: { show: false },
+      itemStyle: { areaColor: '#666', borderColor: '#000' },
+      regionHeight: 0 // empêche le relief de lever les polygones
+    },
+    {
+      type: 'scatter3D',
+      coordinateSystem: 'globe',
+      data: capitalsData,
+      symbol: 'rect',
+      symbolSize: [6, 6],
+      itemStyle: { color: '#fff', borderColor: '#000', borderWidth: 1 },
+      label: {
+        show: true,
+        formatter: p => p.name,
+        color: '#fff',
+        fontSize: 10,
+        distance: 2
+      }
+    }
+  ];
+
+  chart.setOption(getGlobeOption(series));
+
+  // Boutons
+  document.getElementById('toggleDayNight').onclick = () => {
+    s.isNight = !s.isNight;
+    document.getElementById('toggleDayNight').innerText = s.isNight ? 'Mode Jour' : 'Mode Nuit';
+    chart.setOption(getGlobeOption(series), true);
+  };
+
+  document.getElementById('toggleRelief').onclick = () => {
+    s.showRelief = !s.showRelief;
+    document.getElementById('toggleRelief').innerText = s.showRelief ? 'Relief: ON' : 'Relief: OFF';
+    chart.setOption(getGlobeOption(series), true);
+  };
+
+  document.getElementById('toggleClouds').onclick = () => {
+    s.showClouds = !s.showClouds;
+    document.getElementById('toggleClouds').innerText = s.showClouds ? 'Nuages: ON' : 'Nuages: OFF';
+    chart.setOption(getGlobeOption(series), true);
+  };
+
+  document.getElementById('dayTextureSelect').onchange = (e) => {
+    s.dayTextureChoice = e.target.value;
+    chart.setOption(getGlobeOption(series), true);
+  };
+});
 </script>
 </body>
 </html>
