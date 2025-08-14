@@ -271,7 +271,19 @@
         environment: PATH_STARFIELD,
         light: {ambient: {color: '#1f1f1f', intensity: 0}, main: {color: '#FFFDED', intensity: 0.9}},
         viewControl: { autoRotate: false, autoRotateSpeed: AUTO_ROTATE_SPEED, /*minDistance: 50, maxDistance: 600, zoomSensitivity: 2, rotateSensitivity: 2*/ },
-        layers: []
+        layers: [{ show: true,
+                  name: 'pollution lumineuse',
+                  type: 'blend',
+                  intensity: 1,
+                  blendTo: 'emission',
+                  texture: PATH_EARTH_NIGHT_RAW},
+                { show: true,
+                  name: 'nuages',
+                  type: 'overlay',
+                  texture: CLOUDS,
+                  shading: 'lambert',
+                  distance: 1}
+                ]
       },
         /*globe: {
           baseTexture: dayTexture,
