@@ -298,7 +298,10 @@
     const layers = [];
     // Ombre de nuit uniquement en mode jour
     if(!s.isNight){
-      layers.push({ show:true, name:'Ombre nuit', type:'blend', intensity: 1, blendTo: 'emission', texture: PATH_EARTH_NIGHT_RAW });
+      layers.push({ show:true, name:'Ombre nuit', type:'blend', intensity: 0.8, blendTo: 'emission', texture: PATH_EARTH_NIGHT_RAW });
+    }
+    if(s.isNight){
+      layers.push({ show:true, name:'Ombre nuit', type:'blend', intensity: 1.3, blendTo: 'emission', texture: PATH_EARTH_NIGHT_RAW });
     }
     // Nuages via bouton
     if(s.showNuages){
