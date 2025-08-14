@@ -251,6 +251,7 @@
       globe: {
         baseTexture: isNight ? nightTexture : dayTexture,
         heightTexture: (!isNight && showRelief) ? PATH_EARTH_BUMP : undefined,
+        displacementScale: 0.02,
         shading: 'lambert',
         environment: PATH_STARFIELD,
         atmosphere: { show: true },
