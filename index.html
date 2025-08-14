@@ -1,173 +1,165 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Globe Jour/Nuit + Relief + Capitales</title>
-<style>
-  html, body { margin:0; padding:0; height:100%; background:#000; }
-  #chart { width:100%; height:100%; }
-  #toggleDayNight, #toggleRelief {
-    position: absolute;
-    left: 14px;
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.9);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; user-select: none;
-    transition: background 0.2s, transform 0.15s;
-    z-index: 120;
-  }
-  #toggleDayNight { top: 14px; }
-  #toggleRelief { top: 60px; }
-  #toggleDayNight:active, #toggleRelief:active { transform: scale(0.95); }
-  #dayTextureSelect {
-    position: absolute;
-    top: 110px; left: 14px;
-    z-index: 120;
-    background: rgba(255,255,255,0.9);
-    padding: 4px;
-    border-radius: 6px;
-  }
-</style>
+<meta charset="utf-8">
+<title>Globe Jour/Nuit + Relief + Nuages + Capitales</title>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2/dist/echarts-gl.min.js"></script>
+<style>
+  body { margin:0; overflow:hidden; background:#000; }
+  #main { width:100vw; height:100vh; }
+  .control-panel {
+    position:absolute;
+    top:10px;
+    left:10px;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+    z-index:1000;
+  }
+  .control-panel button, .control-panel select {
+    padding:5px 10px;
+    background:#fff;
+    border:1px solid #000;
+    cursor:pointer;
+    font-size:14px;
+  }
+</style>
 </head>
 <body>
-<div id="chart"></div>
-<div id="toggleDayNight">☀️</div>
-<div id="toggleRelief">⛰️</div>
-<select id="dayTextureSelect">
-  <option value="earth.jpg">Earth.jpg</option>
-  <option value="world.topo.bathy.200401.jpg">Topo+Bathy</option>
-</select>
+<div id="main"></div>
+<div class="control-panel">
+  <button id="toggleDayNight">Mode Nuit</button>
+  <button id="toggleRelief">Relief: OFF</button>
+  <button id="toggleClouds">Nuages: ON</button>
+  <select id="dayTextureSelect">
+    <option value="earth.jpg">earth.jpg</option>
+    <option value="world.topo.bathy.200401.jpg">world.topo.bathy.200401.jpg</option>
+  </select>
+</div>
 
 <script>
-const chart = echarts.init(document.getElementById('chart'));
-
-// --- Variables d'état ---
-let isNight = false;
-let showRelief = false;
-let dayTextureChoice = 'earth.jpg';
-
-// --- Chemins vers textures ---
-const PATH_EARTH_DAY = dayTextureChoice;
-const PATH_EARTH_NIGHT = 'earth_night.jpg';
-const PATH_EARTH_BUMP = 'earth_bump.jpg';
 const PATH_STARFIELD = 'starfield.jpg';
+const PATH_EARTH_NIGHT = 'earth_night.jpg';
+const PATH_EARTH_DAY_1 = 'earth.jpg';
+const PATH_EARTH_DAY_2 = 'world.topo.bathy.200401.jpg';
+const PATH_EARTH_BUMP = 'earth_bump.jpg';
 const PATH_CLOUDS = 'clouds.png';
 
-// --- Données capitales (exemple) ---
-const capitalesData = [
-  { city: 'Paris', coord: [2.3522, 48.8566] },
-  { city: 'Shanghai', coord: [121.4737, 31.2304] },
-  { city: 'New York', coord: [-74.006, 40.7128] }
+let s = {
+  isNight: false,
+  showRelief: false,
+  showClouds: true,
+  dayTextureChoice: PATH_EARTH_DAY_1
+};
+
+const chart = echarts.init(document.getElementById('main'));
+
+let layers = [
+  { type: 'blend', blendTo: 'emission', texture: PATH_CLOUDS, intensity: 1 }
 ];
 
-// --- Fonction création option ---
-function makeOption(s) {
-  const layers = [];
-
-  // Ombre nuit uniquement en mode jour
-  if (!s.isNight) {
-    layers.push({
-      type: 'blend',
-      blendTo: 'emission',
-      texture: PATH_EARTH_NIGHT,
-      intensity: 0.7
-    });
+function updateLayers() {
+  if (s.showClouds) {
+    if (!layers.find(l => l.texture === PATH_CLOUDS)) {
+      layers.push({ type: 'blend', blendTo: 'emission', texture: PATH_CLOUDS, intensity: 1 });
+    }
+  } else {
+    layers = layers.filter(l => l.texture !== PATH_CLOUDS);
   }
+}
 
-  // Nuages (toujours affichés ici)
-  layers.push({
-    type: 'overlay',
-    texture: PATH_CLOUDS,
-    shading: 'lambert',
-    distance: 1.02
-  });
-
+function getGlobeOption() {
+  updateLayers();
   return {
-    backgroundColor: '#000',
     globe: {
-      baseTexture: s.isNight ? PATH_EARTH_NIGHT : s.dayTexture,
+      baseTexture: s.isNight ? PATH_EARTH_NIGHT : s.dayTextureChoice,
       heightTexture: s.showRelief ? PATH_EARTH_BUMP : undefined,
       displacementScale: 0.025,
       shading: s.isNight ? 'lambert' : 'realistic',
       environment: PATH_STARFIELD,
-      postEffect: { enable : false },
-      light: {
-        ambient: {color: '#1f1f1f', intensity: 0.2},
-        main: {color: '#FFFDED', intensity: 0.9}
-      },
-      atmosphere:{show:true, color: '#a1a1a1', offset:4},
-      viewControl: { autoRotate: false, autoRotateSpeed:0.5 },
-      layers
+      postEffect: { enable: false },
+      light: { ambient: { color: '#1f1f1f', intensity: 0.2 }, main: { color: '#FFFDED', intensity: 0.9 } },
+      atmosphere: { show: true, color: '#a1a1a1', offset: 4 },
+      viewControl: { autoRotate: false, autoRotateSpeed: 0.5 },
+      layers: layers
     },
-    series: [
-      {
-        type: 'scatter3D',
-        coordinateSystem: 'globe',
-        symbol: 'rect',
-        symbolSize: [6,6],
-        itemStyle: {
-          color: '#fff',
-          borderColor: '#000',
-          borderWidth: 1
-        },
-        label: {
-          show: true,
-          position: 'right',
-          formatter: p => p.data.city,
-          color: '#fff',
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          borderRadius: 3,
-          padding: 2
-        },
-        data: capitalesData.map(c => ({
-          name: c.city,
-          value: [...c.coord, 0],
-          city: c.city
-        }))
-      }
-    ]
+    series: []
   };
 }
 
-// --- Rendu initial ---
-chart.setOption(makeOption({
-  isNight,
-  showRelief,
-  dayTexture: dayTextureChoice
-}));
+// Charger les GeoJSON
+Promise.all([
+  fetch('world.geojson').then(r => r.json()),
+  fetch('capitales.geojson').then(r => r.json())
+]).then(([worldGeo, capitalsGeo]) => {
+  echarts.registerMap('world', worldGeo);
 
-// --- Bouton jour/nuit ---
+  const capitalsData = capitalsGeo.features.map(f => ({
+    name: f.properties.city,
+    value: f.geometry.coordinates.concat([0]) // lon, lat, 0
+  }));
+
+  const option = getGlobeOption();
+  option.series = [
+    {
+      type: 'map3D',
+      map: 'world',
+      shading: 'realistic',
+      realisticMaterial: { roughness: 0.8 },
+      label: { show: false },
+      itemStyle: { areaColor: '#666', borderColor: '#000' }
+    },
+    {
+      type: 'scatter3D',
+      coordinateSystem: 'globe',
+      data: capitalsData,
+      symbol: 'rect',
+      symbolSize: [6, 6],
+      itemStyle: { color: '#fff', borderColor: '#000', borderWidth: 1 },
+      label: {
+        show: true,
+        formatter: p => p.name,
+        color: '#fff',
+        fontSize: 10,
+        distance: 2
+      }
+    }
+  ];
+
+  chart.setOption(option);
+});
+
+// Boutons
 document.getElementById('toggleDayNight').onclick = () => {
-  isNight = !isNight;
-  chart.setOption(makeOption({
-    isNight,
-    showRelief,
-    dayTexture: dayTextureChoice
-  }));
+  s.isNight = !s.isNight;
+  document.getElementById('toggleDayNight').innerText = s.isNight ? 'Mode Jour' : 'Mode Nuit';
+  const opt = getGlobeOption();
+  opt.series = chart.getOption().series;
+  chart.setOption(opt, true);
 };
 
-// --- Bouton relief ---
 document.getElementById('toggleRelief').onclick = () => {
-  showRelief = !showRelief;
-  chart.setOption(makeOption({
-    isNight,
-    showRelief,
-    dayTexture: dayTextureChoice
-  }));
+  s.showRelief = !s.showRelief;
+  document.getElementById('toggleRelief').innerText = s.showRelief ? 'Relief: ON' : 'Relief: OFF';
+  const opt = getGlobeOption();
+  opt.series = chart.getOption().series;
+  chart.setOption(opt, true);
 };
 
-// --- Choix texture jour ---
-document.getElementById('dayTextureSelect').onchange = e => {
-  dayTextureChoice = e.target.value;
-  chart.setOption(makeOption({
-    isNight,
-    showRelief,
-    dayTexture: dayTextureChoice
-  }));
+document.getElementById('toggleClouds').onclick = () => {
+  s.showClouds = !s.showClouds;
+  document.getElementById('toggleClouds').innerText = s.showClouds ? 'Nuages: ON' : 'Nuages: OFF';
+  const opt = getGlobeOption();
+  opt.series = chart.getOption().series;
+  chart.setOption(opt, true);
+};
+
+document.getElementById('dayTextureSelect').onchange = (e) => {
+  s.dayTextureChoice = e.target.value;
+  const opt = getGlobeOption();
+  opt.series = chart.getOption().series;
+  chart.setOption(opt, true);
 };
 </script>
 </body>
