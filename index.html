@@ -36,35 +36,35 @@
   #toggle.night .ball { left:64px; background:#f1d56d; }
   #toggle svg { width:20px; height:20px; }
 
-  /* Toggle relief */
-#toggleRelief {
-  position: absolute;
-  top: 64px; /* un peu sous le bouton jour/nuit */
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 120;
-  user-select: none;
-  background: rgba(255,255,255,0.9);
-  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-  transition: background 0.2s, transform 0.15s;
-}
-#toggleRelief svg {
-  width: 20px;
-  height: 20px;
-}
-#toggleRelief.active {
-  background: rgba(180,255,180,0.9);
-}
-#toggleRelief:active {
-  transform: translateX(-50%) scale(0.95);
-}
+  /* Toggle relief - rond sous jour/nuit */
+  #toggleRelief {
+    position: absolute;
+    top: 60px; /* sous le bouton jour/nuit */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 120;
+    user-select: none;
+    background: rgba(255,255,255,0.9);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+    transition: background 0.2s, transform 0.15s;
+  }
+  #toggleRelief svg {
+    width: 20px;
+    height: 20px;
+  }
+  #toggleRelief.active {
+    background: rgba(180,255,180,0.9);
+  }
+  #toggleRelief:active {
+    transform: translateX(-50%) scale(0.95);
+  }
 
   /* Légende */
   #legend {
@@ -111,8 +111,8 @@
 
     <div id="toggleRelief" role="button" aria-pressed="false" aria-label="Basculer relief">
       <svg viewBox="0 0 24 24">
-        <path d="M3 20h18L12 4z" fill="#444"/>
-        <path d="M12 4l4 8h-8z" fill="#777"/>
+        <path d="M3 20l5-9 4 7 5-10 5 12z" fill="#444"/>
+        <path d="M3 20h18v1H3z" fill="#777"/>
       </svg>
     </div>
 
@@ -136,7 +136,7 @@
   const PATH_COUNTRIES = './countries_10m_new.geojson';
   const PATH_TRAJETS = './ALLLINE_TRAJET_wgs.geojson';
   const PATH_CAPITALS = './capitals.geojson';
-  const PATH_EARTH_BUMP = './world.topo.bathy.200401.jpg';
+  const PATH_EARTH_BUMP = './elev_bump_4k.jpg';
   const AUTO_ROTATE_SPEED = 0.6;
 
   function loadJSON(url){
@@ -246,7 +246,7 @@
         name:'Capitales',
         type:'scatter3D',
         coordinateSystem:'globe',
-        symbol:'circle',
+        symbol:'square',
         symbolSize:6,
         label:{
           show:true,
@@ -264,7 +264,6 @@
       globe: {
         baseTexture: isNight ? nightTexture : dayTexture,
         heightTexture: (!isNight && showRelief) ? PATH_EARTH_BUMP : undefined,
-        displacementScale: 0.02,
         shading: 'lambert',
         environment: PATH_STARFIELD,
         atmosphere: { show: true },
@@ -311,15 +310,17 @@
   toggleEl.addEventListener('click', ()=>{
     toggleEl.classList.toggle('night');
     toggleEl.setAttribute('aria-pressed', String(toggleEl.classList.contains('night')));
-    if(state.isNight){
+    if(toggleEl.classList.contains('night')){
       toggleReliefEl.classList.remove('active'); // enlève relief en mode nuit
     }
     refreshFromUI();
   });
 
   toggleReliefEl.addEventListener('click', ()=>{
-    toggleReliefEl.classList.toggle('active');
-    refreshFromUI();
+    if(!state.isNight){ // actif uniquement en mode jour
+      toggleReliefEl.classList.toggle('active');
+      refreshFromUI();
+    }
   });
 
   chkPays.addEventListener('change', refreshFromUI);
