@@ -129,6 +129,7 @@
 <script>
 (async function(){
   const PATH_EARTH_DAY = './earth.jpg';
+  const CLOUDS = './clouds.png';
   const PATH_EARTH_NIGHT_RAW = './night.jpg';
   const PATH_STARFIELD = './starfield.jpg';
   const PATH_MOON_BASE = './moon-base.jpg';
@@ -272,7 +273,7 @@
         viewControl: { autoRotate: true, autoRotateSpeed: AUTO_ROTATE_SPEED, minDistance: 50, maxDistance: 600, zoomSensitivity: 2, rotateSensitivity: 2 },
         layers: []
       },*/
-        globe: {
+        /*globe: {
           baseTexture: dayTexture,
           heightTexture: (showRelief) ? PATH_EARTH_BUMP : undefined,
           displacementScale: 0.025,
@@ -281,7 +282,41 @@
           atmosphere: { show: true },
           light: {ambient: {intensity: 0.35 }, main: { intensity: 1.0 } },
           viewControl: { autoRotate: true, autoRotateSpeed: AUTO_ROTATE_SPEED, /*minDistance: 50, maxDistance: 600,*/ zoomSensitivity: 2, rotateSensitivity: 2 },
-          layers: [  { type: 'blend',blendTo: 'emission', texture: nightTexture }]  },
+          layers: [  { type: 'blend',blendTo: 'emission', texture: nightTexture }]  },*/
+
+        globe: {
+          baseTexture: PATH_EARTH_BUMP,
+          heightTexture: PATH_EARTH_BUMP,
+          displacementScale: 0.025,
+          shading: 'realistic',
+          environment: PATH_STARFIELD,
+          light: {
+            ambient: {color: '#1f1f1f', intensity: 0},
+            main: {color: '#FFFDED', intensity: 0.9}   
+          },
+          postEffect:{ enable : false},
+          atmosphere:{show:true, color: '#a1a1a1', offset:4},
+          viewControl: { autoRotate: false, autoRotateSpeed:1, /*minDistance: 50, maxDistance: 600,*/ zoomSensitivity: 2, rotateSensitivity: 2 },
+          layers: [
+            { show: true,
+              name: 'pollution lumineuse',
+              type: 'blend',
+              intensity: 1,
+              blendTo: 'emission',
+              texture: PATH_EARTH_NIGHT_RAW
+            },
+            { show: true,
+              name: 'nuages',
+              type: 'overlay',
+              texture: CLOUDS,
+              shading: 'lambert',
+              distance: 1
+            }
+          ]},
+
+
+
+  
           series: []
         };
   }
