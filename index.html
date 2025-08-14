@@ -318,7 +318,7 @@
             }]  },*/
 
         globe: {
-          baseTexture: PATH_EARTH_BUMP,
+          baseTexture: (isNight) ? nightTexture : PATH_EARTH_BUMP ,
           heightTexture:  (showRelief) ? PATH_EARTH_BUMP : undefined,
           displacementScale: 0.025,
           shading: 'realistic',
@@ -331,7 +331,7 @@
           atmosphere:{show:true, color: '#a1a1a1', offset:4},
           viewControl: { autoRotate: false, autoRotateSpeed:1, minDistance: 50, maxDistance: 600, zoomSensitivity: 2, rotateSensitivity: 2 },
           layers: [
-            { show: true,
+            { show: (isNight) ? false : true,
               name: 'pollution lumineuse',
               type: 'blend',
               intensity: 1,
