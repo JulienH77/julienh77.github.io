@@ -201,10 +201,11 @@
         baseTexture: s.isNight ? nightTexture : PATH_EARTH_DAY,
         heightTexture: s.showRelief ? PATH_EARTH_BUMP : undefined,
         displacementScale: 0.025,
-        shading: 'realistic',
+        shading: s.isNight ? 'lambert' : 'realistic',
         environment: PATH_STARFIELD,
-        light: { ambient: {intensity: 0.2}, main: {intensity: 0.9} },
-        atmosphere:{ show:true },
+        postEffect: { enable : false},
+        light: { ambient: {color: '#1f1f1f', intensity: 0.2}, main: {color: '#FFFDED', intensity: 0.9} },
+        atmosphere:{show:true, color: '#a1a1a1', offset:4},
         layers
       },
       series
