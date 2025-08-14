@@ -263,28 +263,39 @@
     return {
       backgroundColor: 'transparent',
       globe: {
-        baseTexture: isNight ? nightTexture : dayTexture,
+        baseTexture: (isNight) ? nightTexture : dayTexture,
         heightTexture: (showRelief) ? PATH_EARTH_BUMP : undefined,
         displacementScale: 0.025,
-        shading: (!isNight) ? 'lambert' : 'realistic',,
-        atmosphere:{show:true, color: '#a1a1a1', offset:4},
+        shading: (!isNight) ? 'lambert' : 'realistic',
+        atmosphere: {show:true, color: '#a1a1a1', offset:4},
         environment: PATH_STARFIELD,
-        light: {ambient: {color: '#1f1f1f', intensity: 0}, main: {color: '#FFFDED', intensity: 0.9}},
+        light: {
+          ambient: {
+            color: '#1f1f1f',
+            intensity: 0.2},
+          main: {
+            color: '#FFFDED', intensity: 0.9
+          }
+        },
         viewControl: { autoRotate: false, autoRotateSpeed: AUTO_ROTATE_SPEED, /*minDistance: 50, maxDistance: 600, zoomSensitivity: 2, rotateSensitivity: 2*/ },
-        layers: [{ show: true,
-                  name: 'pollution lumineuse',
-                  type: 'blend',
-                  intensity: 1,
-                  blendTo: 'emission',
-                  texture: PATH_EARTH_NIGHT_RAW},
-                { show: true,
-                  name: 'nuages',
-                  type: 'overlay',
-                  texture: CLOUDS,
-                  shading: 'lambert',
-                  distance: 1}
-                ]
-      },
+        layers: [
+          { show: true,
+            name: 'pollution lumineuse',
+            type: 'blend',
+            intensity: 1,
+            blendTo: 'emission',
+            texture: PATH_EARTH_NIGHT_RAW
+          },
+          { 
+            show: true,
+            name: 'nuages',
+            type: 'overlay',
+            texture: CLOUDS,
+            shading: 'lambert',
+            distance: 1
+          }
+                ]}, 
+      
         /*globe: {
           baseTexture: dayTexture,
           heightTexture: (showRelief) ? PATH_EARTH_BUMP : undefined,
@@ -292,7 +303,7 @@
           shading: 'realistic',
           environment: PATH_STARFIELD,
           atmosphere:{show:true, color: '#a1a1a1', offset:4},
-          light: {ambient: {color: '#1f1f1f', intensity: 0}, main: {color: '#FFFDED', intensity: 0.9}},
+          light: {ambient: {color: '#1f1f1f', intensity: 0.2}, main: {color: '#FFFDED', intensity: 0.9}},
           viewControl: { autoRotate: true, autoRotateSpeed: AUTO_ROTATE_SPEED, minDistance: 50, maxDistance: 600,zoomSensitivity: 2, rotateSensitivity: 2 },
           layers: [
             { show: true,
@@ -317,7 +328,7 @@
           shading: 'realistic',
           environment: PATH_STARFIELD,
           light: {
-            ambient: {color: '#1f1f1f', intensity: 0},
+            ambient: {color: '#1f1f1f', intensity: 0.2},
             main: {color: '#FFFDED', intensity: 0.9}   
           },
           postEffect:{ enable : false},
