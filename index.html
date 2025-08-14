@@ -37,26 +37,34 @@
   #toggle svg { width:20px; height:20px; }
 
   /* Toggle relief */
-  #toggleRelief {
-    position: absolute;
-    top: 60px;
-    left: 14px;
-    width: 100px;
-    height: 40px;
-    border-radius: 22px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    z-index: 120;
-    user-select: none;
-    background: rgba(255,255,255,0.85);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
-    font-weight: bold;
-  }
-  #toggleRelief.active {
-    background: rgba(180,255,180,0.9);
-  }
+#toggleRelief {
+  position: absolute;
+  top: 64px; /* un peu sous le bouton jour/nuit */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 120;
+  user-select: none;
+  background: rgba(255,255,255,0.9);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.25);
+  transition: background 0.2s, transform 0.15s;
+}
+#toggleRelief svg {
+  width: 20px;
+  height: 20px;
+}
+#toggleRelief.active {
+  background: rgba(180,255,180,0.9);
+}
+#toggleRelief:active {
+  transform: translateX(-50%) scale(0.95);
+}
 
   /* Légende */
   #legend {
@@ -101,7 +109,12 @@
       <div class="ball" aria-hidden="true"></div>
     </div>
 
-    <div id="toggleRelief" role="button" aria-pressed="false" aria-label="Basculer relief">Relief</div>
+    <div id="toggleRelief" role="button" aria-pressed="false" aria-label="Basculer relief">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 20h18L12 4z" fill="#444"/>
+        <path d="M12 4l4 8h-8z" fill="#777"/>
+      </svg>
+    </div>
 
     <div id="legend" role="group" aria-label="Contrôles des couches">
       <label><input id="chkPays" type="checkbox"> Limites (Pays)</label>
