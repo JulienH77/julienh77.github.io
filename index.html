@@ -273,15 +273,17 @@
         layers: []
       },*/
         globe: {
-    baseTexture: dayTexture,
-    heightTexture: PATH_EARTH_BUMP,
-    displacementScale: 0.025,
-    shading: 'lambert',
-    environment: PATH_STARFIELD,
-    light: {ambient: {intensity: 0.1 }, main: { intensity: 1.5 } },
-    layers: [  { type: 'blend',blendTo: 'emission', texture: nightTexture }]  },
-    series: []
-  };
+          baseTexture: dayTexture,
+          heightTexture: (showRelief) ? PATH_EARTH_BUMP : undefined,
+          displacementScale: 0.025,
+          shading: 'lambert',
+          environment: PATH_STARFIELD,
+          atmosphere: { show: true },
+          light: {ambient: {intensity: 0.35 }, main: { intensity: 1.0 } },
+          viewControl: { autoRotate: true, autoRotateSpeed: AUTO_ROTATE_SPEED, /*minDistance: 50, maxDistance: 600,*/ zoomSensitivity: 2, rotateSensitivity: 2 },
+          layers: [  { type: 'blend',blendTo: 'emission', texture: nightTexture }]  },
+          series: []
+        };
   }
 
   let state = { showPays:false, showTrajets:false, showCapitales:false, isNight:false, showRelief:false };
