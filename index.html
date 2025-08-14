@@ -355,7 +355,7 @@ if(s.showTrajets){
         shading: s.isNight ? 'lambert' : 'realistic',
         environment: PATH_STARFIELD,
         postEffect: { enable : false},
-        light: { ambient: {color: '#1f1f1f', intensity: 0.2}, main: {color: '#FFFDED', intensity: 0.9} },
+        light: { ambient: {color: '#1f1f1f', intensity: s.isNight ? 10 : 0.2}, main: {color: '#FFFDED', intensity: s.isNight ? -5 : 0.9} },
         atmosphere:{show:true, color: '#a1a1a1', offset:4},
         viewControl: { autoRotate: false, autoRotateSpeed:0.5, /*minDistance: 50, maxDistance: 600, zoomSensitivity: 2, rotateSensitivity: 2*/ },
         layers
