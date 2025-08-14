@@ -231,21 +231,31 @@
   (countriesGeo.features || []).forEach(f => linesFromPolygonGeom(f.geometry).forEach(l => countryLines.push(l)));
 
   // trajets
-  const trajetLines = [];
-  const mapColor = { avion:'#0da2ff', train:'#ee0020', bus:'#009c27', voiture:'#900dff' };
-  (trajetsGeo.features || []).forEach(f => {
-    const col = mapColor[(f.properties?.trajet || f.properties?.transport || '').toLowerCase()] || '#00ffff';
-    extractLinesFromFeature(f).forEach(l => trajetLines.push({ ...l, lineStyle:{ color: col, width: 3, opacity: 0.95 }, properties:f.properties }));
-  });
+const trajetLines = [];
+const mapColor = { avion:'#0da2ff', train:'#ee0020', bus:'#009c27', voiture:'#900dff' };
+(trajetsGeo.features || []).forEach(f => {
+  const col = mapColor[(f.properties?.trajet || f.properties?.transport || '').toLowerCase()] || '#00ffff';
+  extractLinesFromFeature(f).forEach(l => trajetLines.push({ ...l, lineStyle:{ color: col, width: 3, opacity: 0.95 }, properties:f.properties }));
+});
+
 // Liste unique des noms de trajets
 const trajetNames = [...new Set(
   trajetLines.map(t => t.properties?.nom || t.properties?.trajet || 'Sans nom')
 )];
 
-// État : trajets visibles
-state.visibleTrajets = new Set(trajetNames);
+// état UI
+let state = {
+  showPays:false,
+  showTrajets:false,
+  showCapitales:false,
+  showNuages:true,
+  isNight:false,
+  showRelief:false,
+  dayBase:'earth',
+  visibleTrajets: new Set(trajetNames) // ajouté ici
+};
 
-// Construction de la sous-liste dans la légende
+// --- construction sous-liste dans la légende ---
 const trajetListEl = document.getElementById('trajetList');
 trajetNames.forEach(name => {
   const id = 'trajet_' + name.replace(/\s+/g, '_');
@@ -261,11 +271,11 @@ trajetNames.forEach(name => {
     refresh();
   });
 });
-  
+
+// Bouton pour déplier/replier
 document.getElementById('expandTrajets').addEventListener('click', () => {
   trajetListEl.style.display = trajetListEl.style.display === 'none' ? 'block' : 'none';
 });
-
 
 
   
@@ -279,18 +289,7 @@ document.getElementById('expandTrajets').addEventListener('click', () => {
 
   const globeChart = echarts.init(document.getElementById('globeContainer'), null, { renderer:'webgl' });
   const moonChart  = echarts.init(document.getElementById('moonPreview'), null, { renderer:'webgl' });
-
-  // état UI (ajout: base du fond jour)
-  let state = {
-    showPays:false,
-    showTrajets:false,
-    showCapitales:false,
-    showNuages:true,
-    isNight:false,
-    showRelief:false,
-    dayBase:'earth' // 'earth' | 'topo'
-  };
-
+  
   function makeOption(s) {
     const series = [];
     if(s.showPays){
