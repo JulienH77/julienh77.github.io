@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+	<link rel="preload" href="fond_chaumont.webp" as="image" type="image/webp">
+
+<style>
+html, body {
+    height: 100%;
+}
+
+/* ---    VARIABLES --- */
+:root {
+    --bg: #0f172a;
+    --bg-light: #111827;
+    --border: #1f2937;
+    --text: #e5e7eb;
+    --muted: #9ca3af;
+    --accent: #38bdf8;
+    --accent-hover: #0ea5e9;
+    --radius: 12px;
+    --transition: 0.25s ease;
+}
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* --- GLOBAL --- */
+body {
+    display: flex;
+    flex-direction: column;
+    font-family: 'Inter', sans-serif;
+    color: var(--text);
+    line-height: 1.6;
+    background: linear-gradient(180deg, var(--bg), #020617);
+	background-image: url('fond_chaumont.webp');
+	background-size: cover;
+    min-height: 100vh;
+}
+main.container {
+    flex: 1;
+}
+
+
+/* --- HEADER --- */
+.header {
+    max-width: 1200px;
+    margin: auto;
+    padding: 2rem 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.header-title {
+    max-width: 600px;
+}
+header h1 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: titleIn 0.8s ease-out forwards;
+}
+header p {
+    color: var(--muted);
+    font-size: 1.1rem;
+    opacity: 0;
+    transform: translateY(15px);
+    animation: subtitleIn 0.8s ease-out forwards 0.3s;
+}
+.header-accent {
+    width: 0;
+    height: 4px;
+    background: var(--accent);
+    border-radius: 2px;
+    margin-top: 1.2rem;
+    animation: lineIn 0.6s ease-out forwards 0.6s;
+}
+/* Liens header */
+.link img {
+    width: 40px;
+    height: 40px;
+    opacity: 0.7;
+    transition: var(--transition);
+}
+.link:hover img {
+    opacity: 1;
+    transform: scale(1.15);
+}
+.top-layer {
+    background: rgba(2, 6, 23, 0.5);
+	backdrop-filter: none;
+}
+
+/* --- NAVIGATION --- */
+nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(2, 6, 23, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+}
+nav ul {
+    max-width: 1200px;
+    margin: auto;
+    display: flex;
+    gap: 1.5rem;
+    padding: 1rem;
+    list-style: none;
+    overflow-x: auto;
+}
+nav a {
+    text-decoration: none;
+    color: var(--muted);
+    font-weight: 500;
+    white-space: nowrap;
+    transition: var(--transition);
+}
+nav a:hover {
+    color: var(--accent);
+}
+
+/* --- CONTENU --- */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 3rem 1rem;
+}
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.8rem;
+}
+@media (max-width: 1024px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 640px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+/* ---BLOCS PROJET --- */
+.project-card {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.8rem;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease, background-color 0.25s ease;
+}
+.project-card:hover {
+    transform: translateY(-4px);
+    background-color: rgba(17, 24, 39, 0.96);
+}
+/* Ligne d’entité */
+.project-card::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    width: 0;
+    background: var(--accent);
+    transition: width 0.4s ease;
+}
+.project-card:hover::after {
+    width: 100%;
+}
+/* Icone et texte */
+.project-icon {
+    font-size: 2rem;
+    color: var(--accent);
+    margin-bottom: 1rem;
+}
+.project-card h3 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+.project-card p {
+    color: var(--muted);
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+}
+/* Lien */
+.project-link {
+    margin-top: auto;
+    text-decoration: none;
+    color: var(--accent);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: var(--transition);
+}
+.project-card:hover .project-link {
+    color: var(--accent-hover);
+}
+
+/* --- BADGES --- */
+.badge {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    letter-spacing: 0.3px;
+    backdrop-filter: blur(6px);
+}
+.badge-featured {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+}
+.badge-heart {
+    background: rgba(244, 114, 182, 0.15);
+    color: #f472b6;
+    border: 1px solid rgba(244, 114, 182, 0.4);
+}
+/* Couleur ligne par projet */
+#album::after { background: #38bdf8; }
+#photo::after { background: #f472b6; }
+#guessr::after { background: #34d399; }
+
+/* --- FOOTER --- */
+footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9rem;
+    background: linear-gradient(180deg, var(--bg), #020617);
+}
+
+/* --- ANIMATIONS --- */
+@keyframes titleIn {to { opacity: 1; transform: translateY(0); }}
+@keyframes subtitleIn {to { opacity: 1; transform: translateY(0); }}
+@keyframes lineIn {to { width: 120px; }}
+
+
+
+
+
+
+
+
+
+
+
+
+
+.lang-switch {
+	position: sticky;
+    bottom: 1.5rem;
+    display: flex;
+    gap: 0.4rem;
+    justify-content: flex-end;
+    margin-right: 1.5rem;
+    margin-bottom: 1rem;
+	margin-top: -30px;
+}
+
+
+/* === BOUTON PRINCIPAL === */
+#lang-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(2, 6, 23, 0.85);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.9rem;
+  backdrop-filter: blur(6px);
+
+  transition:
+    transform 0.2s ease,
+    background 0.25s ease,
+    color 0.25s ease,
+    border-radius 0.25s ease,
+    border-color 0.25s ease,
+    box-shadow 0.25s ease;
+
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+#lang-btn:hover {
+  transform: scale(1.08);
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 1px rgba(56, 189, 248, 0.4),
+    0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* === LISTE DES LANGUES === */
+#lang-list {
+  position: absolute;
+  right: 0;
+  bottom: 56px;
+  list-style: none;
+  padding: 6px 0;
+  margin: 0;
+  min-width: 52px;
+
+  background: rgba(2, 6, 23, 0.95);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(10px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+/* ouverture */
+.lang-switch.open #lang-list {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+/* items */
+#lang-list li {
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+#lang-list li:hover {
+  background: rgba(56, 189, 248, 0.12);
+  color: var(--accent);
+}
+
+/* === BOUTON OUVERT === */
+.lang-switch.open #lang-btn {
+  border-radius: 12px;
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* === MOBILE === */
+@media (max-width: 768px) {
+  .lang-switch {
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    bottom: auto;
+    transform: translateY(-50%);
+  }
+
+  #lang-btn {
+    background: rgba(255, 255, 255, 0.9);
+    color: #000;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    box-shadow: none;
+  }
+
+  #lang-btn:hover {
+    color: var(--accent-hover);
+    border-color: var(--accent-hover);
+  }
+
+  #lang-list {
+    top: 56px;
+    bottom: auto;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    transform: translateY(-10px);
+  }
+
+  #lang-list li {
+    color: #000;
+  }
+
+  #lang-list li:hover {
+    background: #f0f0f0;
+    color: #000;
+  }
+}
+
+
+</style>
+
+</head>
+<body>
+	<div class="top-layer">
+		<header class="header">
+			<div class="header-title">
+				<h1 data-i18n="name">Julien Houziaux</h1>
+				<p data-i18n="subtitle">Projets de cartographie et sites webs interactifs</p>
+				<div class="header-accent"></div>
+			</div>
+
+			<div class="header-links">
+				<a class="link" href="https://github.com/JulienH77" target="_blank" aria-label="GitHub"><img src="https://cdn.iconscout.com/icon/free/png-256/free-github-icon-svg-download-png-3073768.png?f=webp" alt="GitHub"></a>
+				<a class="link" href="https://www.linkedin.com/in/julien-houziaux-385090195/" target="_blank" aria-label="Linkedin"><img src="https://cdn.worldvectorlogo.com/logos/linkedin-icon.svg" alt="Linkedin"></a>
+				<a class="link" href="https://letterboxd.com/oShaRKio/" target="_blank" aria-label="Letterboxd"><img src="https://a.ltrbxd.com/logos/letterboxd-mac-icon.png" alt="Letterboxd"></a>
+				<!--<a class="link" href="/CV_Julien_Houziaux.pdf" target="_blank" aria-label="CV"><img src="https://upload.wikimedia.org/wikipedia/commons/9/9f/Curriculum-vitae-warning-icon.svg" alt="CV"></a>-->
+			</div>
+			
+		</header>
+
+		<nav>
+			<ul>
+				<li><a data-i18n="nav_album"  href="https://julienh77.github.io/album_vacances">Album</a></li>
+				<li><a data-i18n="nav_trip"  href="https://julienh77.github.io/trajets_voyage/">Trajets</a></li>
+				<li><a data-i18n="nav_cartography" href="https://julienh77.github.io/cartographie/">Cartographie</a></li>
+				<li><a data-i18n="nav_photogrammetry" href="https://julienh77.github.io/photogrammetrie/">Photogrammétrie</a></li>
+				<li><a data-i18n="nav_guessr" href="https://sites.google.com/view/hautemarneguessr/">Guessr</a></li>
+				<li><a data-i18n="nav_dataviz2024" href="https://sites.google.com/view/dataviz24/concours">Dataviz 2024</a></li>
+				<li><a data-i18n="nav_dataviz2025" href="https://julienh77.github.io/Concours_dataviz_2025/">Dataviz 2025</a></li>
+			</ul>
+		</nav>
+	</div>
+    <main class="container">
+        <section class="grid">
+    
+            <div class="project-card" id="album">
+				<span data-i18n="badge_phare" class="badge badge-featured">Projet phare</span>
+                <div class="project-icon"><i class="fas fa-images"></i></div>
+                <h3 data-i18n="project_album_title">Album Vacances</h3>
+                <p data-i18n="album_desc">Carte interactive et photos de mes voyages à partir de 2025.</p>
+                <a data-i18n="see_project" class="project-link" href="https://julienh77.github.io/album_vacances">Voir le projet →</a>
+            </div>
+    
+            <div class="project-card" id="trajets">
+                <div class="project-icon"><i class="fas fa-route"></i></div>
+                <h3 data-i18n="project_trip_title">Trajets Vacances</h3>
+                <p data-i18n="trip_desc">Visualisation animée de mes trajets et moyens de transport.</p>
+                <a data-i18n="see_project" class="project-link" href="https://julienh77.github.io/trajets_voyage/">Voir le projet →</a>
+            </div>
+    
+            <div class="project-card" id="carto">
+                <div class="project-icon"><i class="fas fa-map"></i></div>
+                <h3 data-i18n="project_cartography_title">Cartographie</h3>
+                <p data-i18n="cartography_desc">Cartes thématiques réalisées avec QGIS et Wonderdraft.</p>
+                <a class="project-link" href="https://julienh77.github.io/cartographie/">Voir le projet →</a>
+            </div>
+    
+            <div class="project-card" id="photo">
+				<span data-i18n="badge_heart" class="badge badge-heart">Projet de cœur</span>
+                <div class="project-icon"><i class="fas fa-cube"></i></div>
+                <h3 data-i18n="project_photogra_title">Photogrammétrie</h3>
+                <p data-i18n="photogra_desc">Modèles 3D de monuments et idées de musée virtuel.</p>
+                <a data-i18n="see_project" class="project-link" href="https://julienh77.github.io/photogrammetrie/">Voir le projet →</a>
+            </div>
+    
+            <div class="project-card" id="guessr">
+                <div class="project-icon"><i class="fas fa-globe-europe"></i></div>
+                <h3 data-i18n="project_guessr_title">Haute-Marne Guessr</h3>
+                <p data-i18n="guessr_desc">Mini jeu façon GeoGuessr limité à la Haute-Marne.</p>
+                <a data-i18n="play" class="project-link" href="https://sites.google.com/view/hautemarneguessr/">Jouer →</a>
+            </div>
+    
+            <div class="project-card" id="data2024">
+                <div class="project-icon"><i class="fas fa-chart-line"></i></div>
+                <h3 data-i18n="project_dataviz24_title">Concours Dataviz 2024</h3>
+                <p data-i18n="dataviz24_desc">Carte interactive prod/cons d’électricité du Grand Est.</p>
+                <a data-i18n="see_project" class="project-link" href="https://sites.google.com/view/dataviz24/concours">Voir le projet →</a>
+            </div>
+    
+            <div class="project-card" id="data2025">
+                <div class="project-icon"><i class="fas fa-dove"></i></div>
+                <h3 data-i18n="project_dataviz25_title">Concours Dataviz 2025</h3>
+                <p data-i18n="dataviz25_desc">Carte interactive sur la faune du Grand Est.</p>
+                <a data-i18n="see_project" class="project-link" href="https://julienh77.github.io/Concours_dataviz_2025/">Voir le projet →</a>
+            </div>
+    
+        </section>
+    </main>
+
+		<div class="lang-switch">
+			<button id="lang-btn">FR</button>
+			<ul id="lang-list">
+				<li data-lang="fr">FR</li>
+				<li data-lang="en">EN</li>
+				<li data-lang="zh">ZH</li>
+			</ul>
+		</div>
+	
+    <footer>
+        <p data-i18n="footer" >© 2025 Julien Houziaux — Seulement par pur amusement</p>
+		<p style="font-size:0.7em">Dernière mise à jour : janvier 2026</p>
+    </footer>
+	
+<!-- OUVRIR / FERMER LE BOUTON DE LANGUE -->
+	<script>
+	const langSwitch = document.querySelector('.lang-switch');
+	const langBtn = document.getElementById('lang-btn');
+
+	langBtn.addEventListener('click', () => {
+	  langSwitch.classList.toggle('open');
+	});
+
+	document.querySelectorAll('#lang-list li').forEach(item => {
+	  item.addEventListener('click', () => {
+		const selectedLang = item.dataset.lang;
+
+		setLang(selectedLang);
+		langSwitch.classList.remove('open');
+	  });
+	});
+	</script>
+	
+	<script src="langues/index_HUB.js"></script>
+
+</body>
+</html>
