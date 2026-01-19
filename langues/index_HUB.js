@@ -423,88 +423,88 @@
 				footer_update: "Terakhir diperbarui: Januari 2026"
 			},
 			it: {
-				tab_title: "",
-				name: "",
-				subtitle: "",
+				tab_title: "Julien Houziaux | Progetti",
+				name: "Julien Houziaux",
+				subtitle: "Progetti di mappatura e siti web interattivi",
 
-				nav_album: "",
-				nav_trip: "",
-				nav_cartography: "",
-				nav_photogrammetry: "",
-				nav_guessr: "",
-				nav_dataviz2024: "",
-				nav_dataviz2025: "",
+				nav_album: "Album",
+				nav_trip: "Viaggi",
+				nav_cartography: "Mappatura",
+				nav_photogrammetry: "Fotogrammetria",
+				nav_guessr: "Guessr",
+				nav_dataviz2024: "Dataviz 2024",
+				nav_dataviz2025: "Dataviz 2025",
 
-				badge_phare: "",
-				badge_heart: "",		
+				badge_phare: "Progetto di punta",
+				badge_heart: "Progetto Cuore",		
 				
-				project_album_title: "",
-				album_desc: "",
+				project_album_title: "Album delle vacanze",
+				album_desc: "Mappa interattiva e foto dei miei viaggi dal 2025 in poi.",
 
-				project_trip_title: "",
-				trip_desc: "",
+				project_trip_title: "Viaggi di vacanza",
+				trip_desc: "Visualizzazione animata dei miei viaggi e mezzi di trasporto.",
 					
-				project_cartography_title: "",
-				cartography_desc: "",
+				project_cartography_title: "Mappatura",
+				cartography_desc: "Mappe tematiche create con QGIS e Wonderdraft.",
 				
-				project_photogra_title: "",
-				photogra_desc: "",
+				project_photogra_title: "Fotogrammetria",
+				photogra_desc: "Modelli 3D di monumenti e idee per un museo virtuale.",
 
-				project_guessr_title: "",
-				guessr_desc: "。",
+				project_guessr_title: "Guessr dell'Alta Marna",
+				guessr_desc: "Minigioco in stile GeoGuessr, limitato all'Alta Marna.",
 
-				project_dataviz24_title: "",
-				dataviz24_desc: "",
+				project_dataviz24_title: "Concorso Dataviz 2024",
+				dataviz24_desc: "Mappa interattiva della produzione/consumo di elettricità nella regione del Grand Est.",
 
-				project_dataviz25_title: "",
-				dataviz25_desc: "",
+				project_dataviz25_title: "Concorso Dataviz 2025",
+				dataviz25_desc: "Mappa interattiva degli uccelli nella regione del Grand Est.",
 
-				see_project: "",
-				play: "",
-				footer: "",
-				footer_update: ""
+				see_project: "Visualizza il progetto →",
+				play: "Gioca →",
+				footer: "© 2025 Julien Houziaux — Solo per divertimento",
+				footer_update: "Ultimo aggiornamento: gennaio 2026"
 			},
 			mi: {
-				tab_title: "",
-				name: "",
-				subtitle: "",
+				tab_title: "Julien Houziaux | Ngā Kaupapa",
+				name: "Julien Houziaux",
+				subtitle: "Ngā kaupapa mahere me ngā paetukutuku taunekeneke",
 
-				nav_album: "",
-				nav_trip: "",
-				nav_cartography: "",
-				nav_photogrammetry: "",
-				nav_guessr: "",
-				nav_dataviz2024: "",
-				nav_dataviz2025: "",
+				nav_album: "Pukaemi",
+				nav_trip: "Ngā Haerenga",
+				nav_cartography: "Te Mahere",
+				nav_photogrammetry: "Whakaahua-ira",
+				nav_guessr: "Guessr",
+				nav_dataviz2024: "Dataviz 2024",
+				nav_dataviz2025: "Dataviz 2025",
 
-				badge_phare: "",
-				badge_heart: "",		
+				badge_phare: "Kaupapa matua",
+				badge_heart: "Kaupapa ngākau",		
 				
-				project_album_title: "",
-				album_desc: "",
+				project_album_title: "Pukaemi Hararei",
+				album_desc: "He mahere tauwhitiwhiti me ngā whakaahua o aku haerenga mai i te tau 2025.",
 
-				project_trip_title: "",
-				trip_desc: "",
+				project_trip_title: "Ngā Hararei o Rajets",
+				trip_desc: "He whakaahua pakiwaituhi o aku haerenga me ngā momo waka.",
 					
-				project_cartography_title: "",
-				cartography_desc: "",
+				project_cartography_title: "Te Mahere",
+				cartography_desc: "He mahere kaupapa i hangaia ki QGIS me Wonderdraft.",
 				
-				project_photogra_title: "",
-				photogra_desc: "",
+				project_photogra_title: "Whakaahua-ira",
+				photogra_desc: "Ngā tauira 3D o ngā whakamaharatanga me ngā whakaaro mō tētahi whare taonga mariko.",
 
-				project_guessr_title: "",
-				guessr_desc: "。",
+				project_guessr_title: "Haute-Marne Guessr",
+				guessr_desc: "He kēmu iti i te momo GeoGuessr, e wātea ana ki Haute-Marne anake.",
 
-				project_dataviz24_title: "",
-				dataviz24_desc: "",
+				project_dataviz24_title: "Whakataetae Dataviz 2024",
+				dataviz24_desc: "He mahere taunekeneke o te whakaputa/whakamahinga hiko i te rohe o Grand Est.",
 
-				project_dataviz25_title: "",
-				dataviz25_desc: "",
+				project_dataviz25_title: "Whakataetae Dataviz 2025",
+				dataviz25_desc: "He mahere taunekeneke o ngā manu o te rohe o Grand Est.",
 
-				see_project: "",
-				play: "",
-				footer: "",
-				footer_update: ""
+				see_project: "Tirohia te kaupapa →",
+				play: "Tākaro →",
+				footer: "© 2025 Julien Houziaux — He mea whakangahau noa iho",
+				footer_update: "Whakahōungia whakamutunga: Hanuere 2026"
 			},
 		};
 
