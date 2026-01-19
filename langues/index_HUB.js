@@ -213,46 +213,46 @@
 				footer_update: "آخر تحديث: يناير 2026"
 			},
 			hi: {
-				tab_title: "",
-				name: "",
-				subtitle: "",
+				tab_title: "Julien Houziaux| प्रोजेक्ट्स",
+				name: "Julien Houziaux",
+				subtitle: "मैपिंग प्रोजेक्ट्स और इंटरैक्टिव वेबसाइट्स",
 
-				nav_album: "",
-				nav_trip: "",
-				nav_cartography: "",
-				nav_photogrammetry: "",
-				nav_guessr: "",
-				nav_dataviz2024: "",
-				nav_dataviz2025: "",
+				nav_album: "एल्बम",
+				nav_trip: "यात्रा",
+				nav_cartography: "मानचित्रण",
+				nav_photogrammetry: "फोटोग्रामेट्री",
+				nav_guessr: "गेसआर",
+				nav_dataviz2024: "डेटाविज़ 2024",
+				nav_dataviz2025: "डेटाविज़ 2025",
 
-				badge_phare: "",
-				badge_heart: "",		
+				badge_phare: "प्रमुख परियोजना",
+				badge_heart: "हृदय परियोजना",		
 				
-				project_album_title: "",
-				album_desc: "",
+				project_album_title: "हॉलिडे एल्बम",
+				album_desc: "2025 के बाद की मेरी यात्राओं का इंटरैक्टिव मैप और फ़ोटो।",
 
-				project_trip_title: "",
-				trip_desc: "",
+				project_trip_title: "छुट्टियों की यात्राएँ",
+				trip_desc: "मेरी यात्राओं और ट्रांसपोर्ट के साधनों का एनिमेटेड विज़ुअलाइज़ेशन।",
 					
-				project_cartography_title: "",
-				cartography_desc: "",
+				project_cartography_title: "मानचित्रण",
+				cartography_desc: "QGIS और वंडरड्राफ्ट से बनाए गए थीमैटिक मैप।",
 				
-				project_photogra_title: "",
-				photogra_desc: "",
+				project_photogra_title: "फोटोग्रामेट्री",
+				photogra_desc: "स्मारकों के 3D मॉडल और वर्चुअल म्यूज़ियम के लिए आइडिया।",
 
-				project_guessr_title: "",
-				guessr_desc: "。",
+				project_guessr_title: "हाउते-मार्ने गेसर",
+				guessr_desc: "GeoGuessr स्टाइल में मिनी गेम, जो हाउते-मार्ने तक लिमिटेड है।",
 
-				project_dataviz24_title: "",
-				dataviz24_desc: "",
+				project_dataviz24_title: "डेटाविज़ प्रतियोगिता 2024",
+				dataviz24_desc: "ग्रैंड ईस्ट क्षेत्र में बिजली उत्पादन/खपत का इंटरैक्टिव मैप।",
 
-				project_dataviz25_title: "",
-				dataviz25_desc: "",
+				project_dataviz25_title: "डेटाविज़ प्रतियोगिता 2025",
+				dataviz25_desc: "ग्रैंड ईस्ट क्षेत्र में पक्षियों का इंटरैक्टिव मैप।",
 
-				see_project: "",
-				play: "",
-				footer: "",
-				footer_update: ""
+				see_project: "प्रोजेक्ट देखें →",
+				play: "खेलें →",
+				footer: "© 2025 जूलियन होउज़ियाक्स — सिर्फ़ मनोरंजन के लिए",
+				footer_update: "पिछला अपडेट: जनवरी 2026"
 			},
 			es: {
 				tab_title: "",
