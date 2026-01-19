@@ -127,7 +127,385 @@
 				play: "播放 →",
 				footer: "© 2025 Julien Houziaux — 僅供娛樂",
 				footer_update: "最後更新時間：2026年1月"
-			}
+			},
+			cn: {
+				tab_title: "Julien Houziaux | 项目",
+				name: "Julien Houziaux",
+				subtitle: "地图项目与互动网站",
+
+				nav_album: "相簿",
+				nav_trip: "路线",
+				nav_cartography: "地图",
+				nav_photogrammetry: "摄影测量",
+				nav_guessr: "猜测",
+				nav_dataviz2024: "2024年资料视觉化",
+				nav_dataviz2025: "2025年资料视觉化",
+
+				badge_phare: "旗舰项目",
+				badge_heart: "热情项目",		
+				
+				project_album_title: "度假相簿",
+				album_desc: "从2025年开始的我的旅行互动地图和照片。",
+
+				project_trip_title: "度假行程",
+				trip_desc: "我的路线和交通方式的动画视觉化。",
+					
+				project_cartography_title: "地图绘制",
+				cartography_desc: "使用 QGIS 和 Wonderdraft 建立的专题地图。",
+				
+				project_photogra_title: "摄影测量",
+				photogra_desc: "纪念碑的 3D 模型和虚拟博物馆的构想。",
+
+				project_guessr_title: "上马恩省猜谜游戏",
+				guessr_desc: "仅限上马恩省的 GeoGuessr 风格的小游戏。",
+
+				project_dataviz24_title: "2024 年资料视觉化竞赛",
+				dataviz24_desc: "大东部地区电力生产/消费的互动式地图。",
+
+				project_dataviz25_title: "2025 年资料视觉化竞赛",
+				dataviz25_desc: "法国大东部地区鸟类互动地图。 (区域)。",
+
+				see_project: "检视项目 →",
+				play: "播放 →",
+				footer: "© 2025 Julien Houziaux — 仅供娱乐",
+				footer_update: "最后更新时间：2026年1月"
+			},
+			ar: {
+				tab_title: " المشاريع | Julien Houziaux",
+				name: "Julien Houziaux",
+				subtitle: "مشاريع رسم الخرائط والمواقع الإلكترونية التفاعلية",
+
+				nav_album: "ألبوم",
+				nav_trip: "رحلات",
+				nav_cartography: "رسم الخرائط",
+				nav_photogrammetry: "التصوير المساحي",
+				nav_guessr: "تخمين",
+				nav_dataviz2024: "تصور البيانات 2024",
+				nav_dataviz2025: "تصور البيانات 2025",
+
+				badge_phare: "مشروع رائد",
+				badge_heart: "مشروع القلب",		
+				
+				project_album_title: "ألبوم العطلات",
+				album_desc: "خريطة تفاعلية وصور لرحلاتي من عام 2025 فصاعدًا.",
+
+				project_trip_title: "رحلات العطلات",
+				trip_desc: "عرض مرئي متحرك لرحلاتي ووسائل النقل التي أستخدمها.",
+					
+				project_cartography_title: "رسم الخرائط",
+				cartography_desc: "خرائط موضوعية تم إنشاؤها باستخدام برنامجي QGIS و Wonderdraft.",
+				
+				project_photogra_title: "التصوير المساحي",
+				photogra_desc: "نماذج ثلاثية الأبعاد للمعالم الأثرية وأفكار لمتحف افتراضي.",
+
+				project_guessr_title: "هوت مارن غيسر",
+				guessr_desc: "لعبة مصغرة على غرار لعبة GeoGuessr، تقتصر على منطقة هوت مارن.",
+
+				project_dataviz24_title: "مسابقة تصور البيانات 2024",
+				dataviz24_desc: "خريطة تفاعلية لإنتاج واستهلاك الكهرباء في منطقة غراند إيست.",
+
+				project_dataviz25_title: "مسابقة تصور البيانات 2025",
+				dataviz25_desc: "خريطة تفاعلية للطيور في منطقة غراند إيست.",
+
+				see_project: "عرض المشروع →",
+				play: "تشغيل →",
+				footer: "© 2025 جوليان هوزيو — للمتعة فقط",
+				footer_update: "آخر تحديث: يناير 2026"
+			},
+			hi: {
+				tab_title: "",
+				name: "",
+				subtitle: "",
+
+				nav_album: "",
+				nav_trip: "",
+				nav_cartography: "",
+				nav_photogrammetry: "",
+				nav_guessr: "",
+				nav_dataviz2024: "",
+				nav_dataviz2025: "",
+
+				badge_phare: "",
+				badge_heart: "",		
+				
+				project_album_title: "",
+				album_desc: "",
+
+				project_trip_title: "",
+				trip_desc: "",
+					
+				project_cartography_title: "",
+				cartography_desc: "",
+				
+				project_photogra_title: "",
+				photogra_desc: "",
+
+				project_guessr_title: "",
+				guessr_desc: "。",
+
+				project_dataviz24_title: "",
+				dataviz24_desc: "",
+
+				project_dataviz25_title: "",
+				dataviz25_desc: "",
+
+				see_project: "",
+				play: "",
+				footer: "",
+				footer_update: ""
+			},
+			es: {
+				tab_title: "",
+				name: "",
+				subtitle: "",
+
+				nav_album: "",
+				nav_trip: "",
+				nav_cartography: "",
+				nav_photogrammetry: "",
+				nav_guessr: "",
+				nav_dataviz2024: "",
+				nav_dataviz2025: "",
+
+				badge_phare: "",
+				badge_heart: "",		
+				
+				project_album_title: "",
+				album_desc: "",
+
+				project_trip_title: "",
+				trip_desc: "",
+					
+				project_cartography_title: "",
+				cartography_desc: "",
+				
+				project_photogra_title: "",
+				photogra_desc: "",
+
+				project_guessr_title: "",
+				guessr_desc: "。",
+
+				project_dataviz24_title: "",
+				dataviz24_desc: "",
+
+				project_dataviz25_title: "",
+				dataviz25_desc: "",
+
+				see_project: "",
+				play: "",
+				footer: "",
+				footer_update: ""
+			},
+			ja: {
+				tab_title: "",
+				name: "",
+				subtitle: "",
+
+				nav_album: "",
+				nav_trip: "",
+				nav_cartography: "",
+				nav_photogrammetry: "",
+				nav_guessr: "",
+				nav_dataviz2024: "",
+				nav_dataviz2025: "",
+
+				badge_phare: "",
+				badge_heart: "",		
+				
+				project_album_title: "",
+				album_desc: "",
+
+				project_trip_title: "",
+				trip_desc: "",
+					
+				project_cartography_title: "",
+				cartography_desc: "",
+				
+				project_photogra_title: "",
+				photogra_desc: "",
+
+				project_guessr_title: "",
+				guessr_desc: "。",
+
+				project_dataviz24_title: "",
+				dataviz24_desc: "",
+
+				project_dataviz25_title: "",
+				dataviz25_desc: "",
+
+				see_project: "",
+				play: "",
+				footer: "",
+				footer_update: ""
+			},
+			de: {
+				tab_title: "",
+				name: "",
+				subtitle: "",
+
+				nav_album: "",
+				nav_trip: "",
+				nav_cartography: "",
+				nav_photogrammetry: "",
+				nav_guessr: "",
+				nav_dataviz2024: "",
+				nav_dataviz2025: "",
+
+				badge_phare: "",
+				badge_heart: "",		
+				
+				project_album_title: "",
+				album_desc: "",
+
+				project_trip_title: "",
+				trip_desc: "",
+					
+				project_cartography_title: "",
+				cartography_desc: "",
+				
+				project_photogra_title: "",
+				photogra_desc: "",
+
+				project_guessr_title: "",
+				guessr_desc: "。",
+
+				project_dataviz24_title: "",
+				dataviz24_desc: "",
+
+				project_dataviz25_title: "",
+				dataviz25_desc: "",
+
+				see_project: "",
+				play: "",
+				footer: "",
+				footer_update: ""
+			},
+			id: {
+				tab_title: "",
+				name: "",
+				subtitle: "",
+
+				nav_album: "",
+				nav_trip: "",
+				nav_cartography: "",
+				nav_photogrammetry: "",
+				nav_guessr: "",
+				nav_dataviz2024: "",
+				nav_dataviz2025: "",
+
+				badge_phare: "",
+				badge_heart: "",		
+				
+				project_album_title: "",
+				album_desc: "",
+
+				project_trip_title: "",
+				trip_desc: "",
+					
+				project_cartography_title: "",
+				cartography_desc: "",
+				
+				project_photogra_title: "",
+				photogra_desc: "",
+
+				project_guessr_title: "",
+				guessr_desc: "。",
+
+				project_dataviz24_title: "",
+				dataviz24_desc: "",
+
+				project_dataviz25_title: "",
+				dataviz25_desc: "",
+
+				see_project: "",
+				play: "",
+				footer: "",
+				footer_update: ""
+			},
+			it: {
+				tab_title: "",
+				name: "",
+				subtitle: "",
+
+				nav_album: "",
+				nav_trip: "",
+				nav_cartography: "",
+				nav_photogrammetry: "",
+				nav_guessr: "",
+				nav_dataviz2024: "",
+				nav_dataviz2025: "",
+
+				badge_phare: "",
+				badge_heart: "",		
+				
+				project_album_title: "",
+				album_desc: "",
+
+				project_trip_title: "",
+				trip_desc: "",
+					
+				project_cartography_title: "",
+				cartography_desc: "",
+				
+				project_photogra_title: "",
+				photogra_desc: "",
+
+				project_guessr_title: "",
+				guessr_desc: "。",
+
+				project_dataviz24_title: "",
+				dataviz24_desc: "",
+
+				project_dataviz25_title: "",
+				dataviz25_desc: "",
+
+				see_project: "",
+				play: "",
+				footer: "",
+				footer_update: ""
+			},
+			mi: {
+				tab_title: "",
+				name: "",
+				subtitle: "",
+
+				nav_album: "",
+				nav_trip: "",
+				nav_cartography: "",
+				nav_photogrammetry: "",
+				nav_guessr: "",
+				nav_dataviz2024: "",
+				nav_dataviz2025: "",
+
+				badge_phare: "",
+				badge_heart: "",		
+				
+				project_album_title: "",
+				album_desc: "",
+
+				project_trip_title: "",
+				trip_desc: "",
+					
+				project_cartography_title: "",
+				cartography_desc: "",
+				
+				project_photogra_title: "",
+				photogra_desc: "",
+
+				project_guessr_title: "",
+				guessr_desc: "。",
+
+				project_dataviz24_title: "",
+				dataviz24_desc: "",
+
+				project_dataviz25_title: "",
+				dataviz25_desc: "",
+
+				see_project: "",
+				play: "",
+				footer: "",
+				footer_update: ""
+			},
 		};
 
 // vérifie si l'utilisateur a déjà choisi une langue
