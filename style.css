@@ -340,6 +340,10 @@ footer {
   color: var(--muted);
   cursor: pointer;
   transition: background 0.2s ease, color 0.2s ease;
+  max-width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 #lang-list li:hover {
@@ -352,4 +356,5 @@ footer {
   border-radius: 12px;
   color: var(--accent);
   border-color: var(--accent);
+
 }
