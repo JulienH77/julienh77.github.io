@@ -113,25 +113,8 @@
 		<p data-i18n="footer_update" style="font-size:0.7em">Dernière mise à jour : janvier 2026</p>
     </footer>
 	
-<!-- OUVRIR / FERMER LE BOUTON DE LANGUE -->
-	<script>
-	const langSwitch = document.querySelector('.lang-switch');
-	const langBtn = document.getElementById('lang-btn');
-
-	langBtn.addEventListener('click', () => {
-	  langSwitch.classList.toggle('open');
-	});
-
-	document.querySelectorAll('#lang-list li').forEach(item => {
-	  item.addEventListener('click', () => {
-		const selectedLang = item.dataset.lang;
-
-		setLang(selectedLang);
-		langSwitch.classList.remove('open');
-	  });
-	});
-	</script>
-	
+<!-- Button_for_language TOUJOURS au dessus des traductions -->
+	<script src="langue/Button_for_language.js"></script>
 	<script src="langues/index_HUB.js"></script>
 
 </body>
