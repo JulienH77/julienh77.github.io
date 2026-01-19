@@ -31,7 +31,7 @@
 				guessr_desc: "Mini jeu façon GeoGuessr limité à la Haute-Marne.",
 
 				project_dataviz24_title: "Concours Dataviz 2024",
-				dataviz24_desc: "Carte interactive production/consommation d’électricité du Grand Est.",
+				dataviz24_desc: "Carte interactive production/consommation d'électricité du Grand Est.",
 
 				project_dataviz25_title: "Concours Dataviz 2025",
 				dataviz25_desc: "Carte interactive sur les oiseaux du Grand Est.",
@@ -339,88 +339,88 @@
 				footer_update: "最終更新日: 2026年1月"
 			},
 			de: {
-				tab_title: "",
-				name: "",
-				subtitle: "",
+				tab_title: "Julien Houziaux | Projekte",
+				name: "Julien Houziaux",
+				subtitle: "Kartierungsprojekte und interaktive Websites",
 
-				nav_album: "",
-				nav_trip: "",
-				nav_cartography: "",
-				nav_photogrammetry: "",
-				nav_guessr: "",
-				nav_dataviz2024: "",
-				nav_dataviz2025: "",
+				nav_album: "Album",
+				nav_trip: "Reisen",
+				nav_cartography: "Abbildung",
+				nav_photogrammetry: "Photogrammetrie",
+				nav_guessr: "Guessr",
+				nav_dataviz2024: "Dataviz 2024",
+				nav_dataviz2025: "Dataviz 2025",
 
-				badge_phare: "",
-				badge_heart: "",		
+				badge_phare: "Vorzeigeprojekt",
+				badge_heart: "Herzprojekt",		
 				
-				project_album_title: "",
-				album_desc: "",
+				project_album_title: "Weihnachtsalbum",
+				album_desc: "Interaktive Karte und Fotos meiner Reisen ab 2025.",
 
-				project_trip_title: "",
-				trip_desc: "",
+				project_trip_title: "Urlaubsreisen",
+				trip_desc: "Animierte Visualisierung meiner Reisen und Transportmittel.",
 					
-				project_cartography_title: "",
-				cartography_desc: "",
+				project_cartography_title: "Abbildung",
+				cartography_desc: "Thematische Karten, erstellt mit QGIS und Wonderdraft.",
 				
-				project_photogra_title: "",
-				photogra_desc: "",
+				project_photogra_title: "Photogrammetrie",
+				photogra_desc: "3D-Modelle von Denkmälern und Ideen für ein virtuelles Museum.",
 
-				project_guessr_title: "",
-				guessr_desc: "。",
+				project_guessr_title: "Haute-Marne Guessr",
+				guessr_desc: "Minispiel im Stil von GeoGuessr, beschränkt auf Haute-Marne.",
 
-				project_dataviz24_title: "",
-				dataviz24_desc: "",
+				project_dataviz24_title: "Dataviz-Wettbewerb 2024",
+				dataviz24_desc: "Interaktive Karte der Stromerzeugung und des Stromverbrauchs in der Region Grand Est.",
 
-				project_dataviz25_title: "",
-				dataviz25_desc: "",
+				project_dataviz25_title: "Dataviz-Wettbewerb 2025",
+				dataviz25_desc: "Interaktive Karte der Vögel in der Region Grand Est.",
 
-				see_project: "",
-				play: "",
-				footer: "",
-				footer_update: ""
+				see_project: "Projekt ansehen →",
+				play: "Spielen →",
+				footer: "© 2025 Julien Houziaux — Nur zum Spaß",
+				footer_update: "Letzte Aktualisierung: Januar 2026"
 			},
 			id: {
-				tab_title: "",
-				name: "",
-				subtitle: "",
+				tab_title: "Julien Houziaux | Proyek",
+				name: "Julien Houziaux",
+				subtitle: "Proyek pemetaan dan situs web interaktif",
 
-				nav_album: "",
-				nav_trip: "",
-				nav_cartography: "",
-				nav_photogrammetry: "",
-				nav_guessr: "",
-				nav_dataviz2024: "",
-				nav_dataviz2025: "",
+				nav_album: "Album",
+				nav_trip: "Perjalanan",
+				nav_cartography: "Pemetaan",
+				nav_photogrammetry: "Fotogrametri",
+				nav_guessr: "Guessr",
+				nav_dataviz2024: "Visualisasi Data 2024",
+				nav_dataviz2025: "Visualisasi Data 2025",
 
-				badge_phare: "",
-				badge_heart: "",		
+				badge_phare: "Proyek unggulan",
+				badge_heart: "Proyek jantung",		
 				
-				project_album_title: "",
-				album_desc: "",
+				project_album_title: "Album Liburan",
+				album_desc: "Peta interaktif dan foto-foto perjalanan saya mulai tahun 2025 dan seterusnya.",
 
-				project_trip_title: "",
-				trip_desc: "",
+				project_trip_title: "Perjalanan Liburan",
+				trip_desc: "Visualisasi animasi perjalanan saya dan alat transportasi yang saya gunakan.",
 					
-				project_cartography_title: "",
-				cartography_desc: "",
+				project_cartography_title: "Pemetaan",
+				cartography_desc: "Peta tematik yang dibuat dengan QGIS dan Wonderdraft.",
 				
-				project_photogra_title: "",
-				photogra_desc: "",
+				project_photogra_title: "Fotogrametri",
+				photogra_desc: "Model 3D monumen dan ide untuk museum virtual.",
 
-				project_guessr_title: "",
-				guessr_desc: "。",
+				project_guessr_title: "Haute-Marne Guessr",
+				guessr_desc: "Permainan mini bergaya GeoGuessr, terbatas untuk Haute-Marne.",
 
-				project_dataviz24_title: "",
-				dataviz24_desc: "",
+				project_dataviz24_title: "Kompetisi Visualisasi Data 2024",
+				dataviz24_desc: "Peta interaktif produksi/konsumsi listrik di wilayah Grand Est.",
 
-				project_dataviz25_title: "",
-				dataviz25_desc: "",
+				project_dataviz25_title: "Kompetisi Visualisasi Data 2024",
+				dataviz25_desc: "Peta interaktif burung-burung di wilayah Grand Est.",
 
-				see_project: "",
-				play: "",
-				footer: "",
-				footer_update: ""
+				see_project: "Lihat proyeknya →",
+				play: "Mainkan →",
+				footer: "© 2025 Julien Houziaux — Hanya untuk bersenang-senang",
+				footer_update: "Terakhir diperbarui: Januari 2026"
 			},
 			it: {
 				tab_title: "",
