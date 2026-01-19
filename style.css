@@ -319,7 +319,9 @@ footer {
   pointer-events: none;
   transform: translateY(10px);
   transition: opacity 0.25s ease, transform 0.25s ease;
-  z-index:1000;
+
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
 }
 
 /* ouverture */
