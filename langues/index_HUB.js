@@ -2,7 +2,7 @@
 			fr: {
 				tab_title: "Julien Houziaux | Projets",
 				name: "Julien Houziaux",
-				subtitle: "Projets de cartographie et sites webs interactifs",
+				subtitle: "Projets de cartographie et sites web interactifs",
 
 				nav_album: "Album",
 				nav_trip: "Trajets",
@@ -31,7 +31,7 @@
 				guessr_desc: "Mini jeu façon GeoGuessr limité à la Haute-Marne.",
 
 				project_dataviz24_title: "Concours Dataviz 2024",
-				dataviz24_desc: "Carte interactive prod/cons d’électricité du Grand Est.",
+				dataviz24_desc: "Carte interactive production/consommation d’électricité du Grand Est.",
 
 				project_dataviz25_title: "Concours Dataviz 2025",
 				dataviz25_desc: "Carte interactive sur les oiseaux du Grand Est.",
@@ -95,7 +95,7 @@
 				nav_trip: "路線",
 				nav_cartography: "地圖",
 				nav_photogrammetry: "攝影測量",
-				nav_guessr: "猜測",
+				nav_guessr: "Guessr",
 				nav_dataviz2024: "2024年資料視覺化",
 				nav_dataviz2025: "2025年資料視覺化",
 
@@ -137,7 +137,7 @@
 				nav_trip: "路线",
 				nav_cartography: "地图",
 				nav_photogrammetry: "摄影测量",
-				nav_guessr: "猜测",
+				nav_guessr: "Guessr",
 				nav_dataviz2024: "2024年资料视觉化",
 				nav_dataviz2025: "2025年资料视觉化",
 
@@ -179,7 +179,7 @@
 				nav_trip: "رحلات",
 				nav_cartography: "رسم الخرائط",
 				nav_photogrammetry: "التصوير المساحي",
-				nav_guessr: "تخمين",
+				nav_guessr: "Guessr",
 				nav_dataviz2024: "تصور البيانات 2024",
 				nav_dataviz2025: "تصور البيانات 2025",
 
@@ -198,7 +198,7 @@
 				project_photogra_title: "التصوير المساحي",
 				photogra_desc: "نماذج ثلاثية الأبعاد للمعالم الأثرية وأفكار لمتحف افتراضي.",
 
-				project_guessr_title: "هوت مارن غيسر",
+				project_guessr_title: "Guessr هوت مارن",
 				guessr_desc: "لعبة مصغرة على غرار لعبة GeoGuessr، تقتصر على منطقة هوت مارن.",
 
 				project_dataviz24_title: "مسابقة تصور البيانات 2024",
@@ -221,7 +221,7 @@
 				nav_trip: "यात्रा",
 				nav_cartography: "मानचित्रण",
 				nav_photogrammetry: "फोटोग्रामेट्री",
-				nav_guessr: "गेसआर",
+				nav_guessr: "Guessr",
 				nav_dataviz2024: "डेटाविज़ 2024",
 				nav_dataviz2025: "डेटाविज़ 2025",
 
@@ -240,7 +240,7 @@
 				project_photogra_title: "फोटोग्रामेट्री",
 				photogra_desc: "स्मारकों के 3D मॉडल और वर्चुअल म्यूज़ियम के लिए आइडिया।",
 
-				project_guessr_title: "हाउते-मार्ने गेसर",
+				project_guessr_title: "हाउते-मार्नेGuessr",
 				guessr_desc: "GeoGuessr स्टाइल में मिनी गेम, जो हाउते-मार्ने तक लिमिटेड है।",
 
 				project_dataviz24_title: "डेटाविज़ प्रतियोगिता 2024",
@@ -255,88 +255,88 @@
 				footer_update: "पिछला अपडेट: जनवरी 2026"
 			},
 			es: {
-				tab_title: "",
-				name: "",
-				subtitle: "",
+				tab_title: "Julien Houziaux | Proyectos",
+				name: "Julien Houziaux",
+				subtitle: "Proyectos de mapeo y sitios web interactivos",
 
-				nav_album: "",
-				nav_trip: "",
-				nav_cartography: "",
-				nav_photogrammetry: "",
-				nav_guessr: "",
-				nav_dataviz2024: "",
-				nav_dataviz2025: "",
+				nav_album: "Álbum",
+				nav_trip: "Viajes",
+				nav_cartography: "Cartografía",
+				nav_photogrammetry: "Fotogrametría",
+				nav_guessr: "Guessr",
+				nav_dataviz2024: "Visualización de datos 2024",
+				nav_dataviz2025: "Visualización de datos 2025",
 
-				badge_phare: "",
-				badge_heart: "",		
+				badge_phare: "Proyecto insignia",
+				badge_heart: "Proyecto Corazón",		
 				
-				project_album_title: "",
-				album_desc: "",
+				project_album_title: "Álbum de vacaciones",
+				album_desc: "Mapa interactivo y fotos de mis viajes a partir de 2025.",
 
-				project_trip_title: "",
-				trip_desc: "",
+				project_trip_title: "Viajes de vacaciones",
+				trip_desc: "Visualización animada de mis viajes y medios de transporte.",
 					
-				project_cartography_title: "",
-				cartography_desc: "",
+				project_cartography_title: "Cartografía",
+				cartography_desc: "Mapas temáticos creados con QGIS y Wonderdraft.",
 				
-				project_photogra_title: "",
-				photogra_desc: "",
+				project_photogra_title: "Fotogrametría",
+				photogra_desc: "Modelos 3D de monumentos e ideas para un museo virtual.",
 
-				project_guessr_title: "",
-				guessr_desc: "。",
+				project_guessr_title: "Guessr de Haute-Marne",
+				guessr_desc: "Minijuego al estilo de GeoGuessr, limitado a Haute-Marne.",
 
-				project_dataviz24_title: "",
-				dataviz24_desc: "",
+				project_dataviz24_title: "Concurso de visualización de datos 2024",
+				dataviz24_desc: "Mapa interactivo de ventajas y desventajas de la electricidad en la región Gran Este.",
 
-				project_dataviz25_title: "",
-				dataviz25_desc: "",
+				project_dataviz25_title: "Concurso de visualización de datos 2025",
+				dataviz25_desc: "Mapa interactivo de las aves en la región Gran Este.",
 
-				see_project: "",
-				play: "",
-				footer: "",
-				footer_update: ""
+				see_project: "Ver el proyecto →",
+				play: "Jugar →",
+				footer: "© 2025 Julien Houziaux — Solo por diversión",
+				footer_update: "Última actualización: enero de 2026"
 			},
 			ja: {
-				tab_title: "",
-				name: "",
-				subtitle: "",
+				tab_title: "Julien Houziaux | プロジェクト",
+				name: "Julien Houziaux",
+				subtitle: "マッピングプロジェクトとインタラクティブなウェブサイト",
 
-				nav_album: "",
-				nav_trip: "",
-				nav_cartography: "",
-				nav_photogrammetry: "",
-				nav_guessr: "",
-				nav_dataviz2024: "",
-				nav_dataviz2025: "",
+				nav_album: "アルバム",
+				nav_trip: "旅",
+				nav_cartography: "マッピング",
+				nav_photogrammetry: "写真測量",
+				nav_guessr: "Guessr",
+				nav_dataviz2024: "データビジュアライゼーション2024",
+				nav_dataviz2025: "データビジュアライゼーション2025",
 
-				badge_phare: "",
-				badge_heart: "",		
+				badge_phare: "フラッグシッププロジェクト",
+				badge_heart: "ハートプロジェクト",		
 				
-				project_album_title: "",
-				album_desc: "",
+				project_album_title: "ホリデーアルバム",
+				album_desc: "2025 年以降の私の旅行のインタラクティブ マップと写真。",
 
-				project_trip_title: "",
-				trip_desc: "",
+				project_trip_title: "休暇旅行",
+				trip_desc: "私の旅と交通手段をアニメーションで視覚化しました。",
 					
-				project_cartography_title: "",
-				cartography_desc: "",
+				project_cartography_title: "マッピング",
+				cartography_desc: "QGIS と Wonderdraft を使用して作成されたテーママップ。",
 				
-				project_photogra_title: "",
-				photogra_desc: "",
+				project_photogra_title: "写真測量",
+				photogra_desc: "記念碑の 3D モデルと仮想博物館のアイデア。",
 
-				project_guessr_title: "",
-				guessr_desc: "。",
+				project_guessr_title: "オート＝マルヌ県 Guessr",
+				guessr_desc: "オート＝マルヌ限定の、GeoGuessr スタイルのミニゲーム。",
 
-				project_dataviz24_title: "",
-				dataviz24_desc: "",
+				project_dataviz24_title: "データビジュアライゼーションコンペティション2024",
+				dataviz24_desc: "グラン・テスト地域の電力生産/消費のインタラクティブ マップ。",
 
-				project_dataviz25_title: "",
-				dataviz25_desc: "",
+				project_dataviz25_title: "データビジュアライゼーションコンペティション2025",
+				dataviz25_desc: "グラン・テスト地域の鳥類のインタラクティブ マップ。",
 
-				see_project: "",
-				play: "",
-				footer: "",
-				footer_update: ""
+				see_project: "プロジェクトを見る →",
+				play: "再生→",
+				footer: "© 2025 Julien Houziaux — 楽しみのためだけに",
+				footer_update: "最終更新日: 2026年1月"
 			},
 			de: {
 				tab_title: "",
