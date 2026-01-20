@@ -570,7 +570,7 @@
 				project_trip_title: "Путешествия на отдых",
 				trip_desc: "Анимированная визуализация моих поездок и средств передвижения.",
 					
-				project_cartography_title: "",
+				project_cartography_title: "Картографирование",
 				cartography_desc: "Тематические карты созданы с помощью QGIS и Wonderdraft.",
 				
 				project_photogra_title: "Фотограмметрия",
@@ -591,88 +591,88 @@
 				footer_update: "Последнее обновление: январь 2026 г."
 			},
 			fil: {
-				tab_title: "",
+				tab_title: "Julien Houziaux | Mga Proyekto",
 				name: "Julien Houziaux",
-				subtitle: "",
+				subtitle: "Mga proyekto sa pagmamapa at mga interactive na website",
 
-				nav_album: "",
-				nav_trip: "",
-				nav_cartography: "",
-				nav_photogrammetry: "",
-				nav_guessr: "",
-				nav_dataviz2024: "",
-				nav_dataviz2025: "",
+				nav_album: "Album",
+				nav_trip: "Mga Paglalakbay",
+				nav_cartography: "Pagmamapa",
+				nav_photogrammetry: "Potogrametriya",
+				nav_guessr: "Guessr",
+				nav_dataviz2024: "Dataviz 2024",
+				nav_dataviz2025: "Dataviz 2025",
 
-				badge_phare: "",
-				badge_heart: "",		
+				badge_phare: "Pangunahing proyekto",
+				badge_heart: "Proyekto sa puso",		
 				
-				project_album_title: "",
-				album_desc: "",
+				project_album_title: "Album ng Pasko",
+				album_desc: "Interaktibong mapa at mga larawan ng aking mga paglalakbay mula 2025 pataas.",
 
-				project_trip_title: "",
-				trip_desc: "",
+				project_trip_title: "Mga Paglalakbay sa Bakasyon",
+				trip_desc: "Animated na biswalisasyon ng aking mga paglalakbay at mga paraan ng transportasyon.",
 					
-				project_cartography_title: "",
-				cartography_desc: "",
+				project_cartography_title: "Pagmamapa",
+				cartography_desc: "Mga tematikong mapa na ginawa gamit ang QGIS at Wonderdraft.",
 				
-				project_photogra_title: "",
-				photogra_desc: "",
+				project_photogra_title: "Potogrametriya",
+				photogra_desc: "Mga 3D na modelo ng mga monumento at mga ideya para sa isang virtual na museo.",
 
-				project_guessr_title: "",
-				guessr_desc: "",
+				project_guessr_title: "Haute-Marne Guessr",
+				guessr_desc: "Mini-laro sa istilo ng GeoGuessr, limitado sa Haute-Marne.",
 
-				project_dataviz24_title: "",
-				dataviz24_desc: "",
+				project_dataviz24_title: "Kompetisyon sa Dataviz 2024",
+				dataviz24_desc: "Interaktibong mapa ng produksyon/konsumo ng kuryente sa rehiyon ng Grand Est.",
 
-				project_dataviz25_title: "",
-				dataviz25_desc: "",
+				project_dataviz25_title: "Kompetisyon sa Dataviz 2025",
+				dataviz25_desc: "Interaktibong mapa ng mga ibon sa rehiyon ng Grand Est.",
 
-				see_project: "",
-				play: "",
-				footer: "",
-				footer_update: ""
+				see_project: "Tingnan ang proyekto →",
+				play: "Maglaro →",
+				footer: "© 2025 Julien Houziaux — Katuwaan lang",
+				footer_update: "Huling na-update: Enero 2026"
 			},
 			mg: {
-				tab_title: "",
+				tab_title: "Julien Houziaux | TETIKASA",
 				name: "Julien Houziaux",
-				subtitle: "",
+				subtitle: "Tetikasa fanaovana sarintany sy tranonkala ifandrimbonana",
 
-				nav_album: "",
-				nav_trip: "",
-				nav_cartography: "",
-				nav_photogrammetry: "",
-				nav_guessr: "",
-				nav_dataviz2024: "",
-				nav_dataviz2025: "",
+				nav_album: "raki-kira",
+				nav_trip: "nandehanany",
+				nav_cartography: "Sarintany",
+				nav_photogrammetry: "Fotogrammetria",
+				nav_guessr: "Guessr",
+				nav_dataviz2024: "Dataviz 2024",
+				nav_dataviz2025: "Dataviz 2025",
 
-				badge_phare: "",
-				badge_heart: "",		
+				badge_phare: "Tetikasa malaza",
+				badge_heart: "Tetikasa fo",		
 				
-				project_album_title: "",
-				album_desc: "",
+				project_album_title: "Rakikira fialantsasatra",
+				album_desc: "Sarintany ifandrimbonana sy sarin'ny dia nataoko nanomboka tamin'ny taona 2025.",
 
-				project_trip_title: "",
-				trip_desc: "",
+				project_trip_title: "Dia fialan-tsasatra",
+				trip_desc: "Sary mihetsika maneho ny diako sy ny fitaovam-pitaterana nataoko.",
 					
-				project_cartography_title: "",
-				cartography_desc: "",
+				project_cartography_title: "Sarintany",
+				cartography_desc: "Sarintany tematika noforonina tamin'ny QGIS sy Wonderdraft.",
 				
-				project_photogra_title: "",
-				photogra_desc: "",
+				project_photogra_title: "Fotogrammetria",
+				photogra_desc: "Modely 3D an'ny tsangambato sy hevitra ho an'ny tranombakoka virtoaly.",
 
-				project_guessr_title: "",
-				guessr_desc: "",
+				project_guessr_title: "Haute-Marne Guessr",
+				guessr_desc: "Lalao kely amin'ny fomba GeoGuessr, voafetra ho an'i Haute-Marne.",
 
-				project_dataviz24_title: "",
-				dataviz24_desc: "",
+				project_dataviz24_title: "Fifaninanana Dataviz 2024",
+				dataviz24_desc: "Sarintany ifandrimbonan'ny famokarana/fanjifana herinaratra ao amin'ny faritr'i Grand Est.",
 
-				project_dataviz25_title: "",
-				dataviz25_desc: "",
+				project_dataviz25_title: "Fifaninanana Dataviz 2025",
+				dataviz25_desc: "Sarintany ifandrimbonan'ny vorona ao amin'ny faritr'i Grand Est.",
 
-				see_project: "",
-				play: "",
-				footer: "",
-				footer_update: ""
+				see_project: "Jereo ny tetikasa →",
+				play: "Milalao →",
+				footer: "© 2025 Julien Houziaux — Ho an'ny fahafinaretana fotsiny",
+				footer_update: "Nohavaozina farany: Janoary 2026"
 			}
 		};
 
