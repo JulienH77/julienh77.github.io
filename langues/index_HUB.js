@@ -506,6 +506,174 @@
 				footer: "© 2025 Julien Houziaux — He mea whakangahau noa iho",
 				footer_update: "Whakahōungia whakamutunga: Hanuere 2026"
 			},
+			ko: {
+				tab_title: "Julien Houziaux | 프로젝트",
+				name: "Julien Houziaux",
+				subtitle: "지도 제작 프로젝트 및 인터랙티브 웹사이트",
+
+				nav_album: "앨범",
+				nav_trip: "여행",
+				nav_cartography: "지도 제작",
+				nav_photogrammetry: "사진측량",
+				nav_guessr: "Guessr",
+				nav_dataviz2024: "데이터 시각화 2024",
+				nav_dataviz2025: "데이터 시각화 2025",
+
+				badge_phare: "주력 프로젝트",
+				badge_heart: "심장 프로젝트",		
+				
+				project_album_title: "홀리데이 앨범",
+				album_desc: "2025년 이후 제 여행 경로를 보여주는 인터랙티브 지도와 사진입니다.",
+
+				project_trip_title: "휴가 여행",
+				trip_desc: "저의 여행과 교통수단을 애니메이션으로 시각화한 것입니다.",
+					
+				project_cartography_title: "지도 제작",
+				cartography_desc: "QGIS와 Wonderdraft를 사용하여 제작한 주제도입니다.",
+				
+				project_photogra_title: "사진측량",
+				photogra_desc: "기념물의 3D 모델과 가상 박물관을 위한 아이디어.",
+
+				project_guessr_title: "오트마른(Haute-Marne) Guessr",
+				guessr_desc: "지오게스(GeoGuessr) 스타일의 미니 게임으로, 오트마른(Haute-Marne) 지역에 한정됩니다.",
+
+				project_dataviz24_title: "2024년 데이터 시각화 경진대회",
+				dataviz24_desc: "그랑 에스트 지역의 전력 생산/소비 현황을 보여주는 대화형 지도입니다.",
+
+				project_dataviz25_title: "2025년 데이터 시각화 경진대회",
+				dataviz25_desc: "그랑 에스트 지역의 조류를 보여주는 인터랙티브 지도.",
+
+				see_project: "프로젝트 보기 →",
+				play: "재생 →",
+				footer: "© 2025 Julien Houziaux — 그냥 재미로",
+				footer_update: "최종 업데이트: 2026년 1월"
+			},
+			ru: {
+				tab_title: "Julien Houziaux | Проекты",
+				name: "Julien Houziaux",
+				subtitle: "Проекты по картографированию и интерактивные веб-сайты",
+
+				nav_album: "Альбом",
+				nav_trip: "Путешествия",
+				nav_cartography: "Картографирование",
+				nav_photogrammetry: "Фотограмметрия",
+				nav_guessr: "Guessr",
+				nav_dataviz2024: "Визуализация данных 2024",
+				nav_dataviz2025: "Визуализация данных 2025",
+
+				badge_phare: "Флагманский проект",
+				badge_heart: "Проект «Сердце»",		
+				
+				project_album_title: "Праздничный альбом",
+				album_desc: "Интерактивная карта и фотографии моих путешествий, начиная с 2025 года.",
+
+				project_trip_title: "Путешествия на отдых",
+				trip_desc: "Анимированная визуализация моих поездок и средств передвижения.",
+					
+				project_cartography_title: "",
+				cartography_desc: "Тематические карты созданы с помощью QGIS и Wonderdraft.",
+				
+				project_photogra_title: "Фотограмметрия",
+				photogra_desc: "3D-модели памятников и идеи для виртуального музея.",
+
+				project_guessr_title: "Верхняя Марна Guessr",
+				guessr_desc: "Мини-игра в стиле GeoGuessr, ограниченная регионом Верхняя Марна.",
+
+				project_dataviz24_title: "Конкурс визуализации данных 2024",
+				dataviz24_desc: "Интерактивная карта производства/потребления электроэнергии в регионе Гранд-Эст.",
+
+				project_dataviz25_title: "Конкурс визуализации данных 2025",
+				dataviz25_desc: "Интерактивная карта птиц региона Гранд-Эст.",
+
+				see_project: "Посмотреть проект →",
+				play: "Играть →",
+				footer: "© 2025 Julien Houziaux — Просто для развлечения",
+				footer_update: "Последнее обновление: январь 2026 г."
+			},
+			fil: {
+				tab_title: "",
+				name: "Julien Houziaux",
+				subtitle: "",
+
+				nav_album: "",
+				nav_trip: "",
+				nav_cartography: "",
+				nav_photogrammetry: "",
+				nav_guessr: "",
+				nav_dataviz2024: "",
+				nav_dataviz2025: "",
+
+				badge_phare: "",
+				badge_heart: "",		
+				
+				project_album_title: "",
+				album_desc: "",
+
+				project_trip_title: "",
+				trip_desc: "",
+					
+				project_cartography_title: "",
+				cartography_desc: "",
+				
+				project_photogra_title: "",
+				photogra_desc: "",
+
+				project_guessr_title: "",
+				guessr_desc: "",
+
+				project_dataviz24_title: "",
+				dataviz24_desc: "",
+
+				project_dataviz25_title: "",
+				dataviz25_desc: "",
+
+				see_project: "",
+				play: "",
+				footer: "",
+				footer_update: ""
+			},
+			mg: {
+				tab_title: "",
+				name: "Julien Houziaux",
+				subtitle: "",
+
+				nav_album: "",
+				nav_trip: "",
+				nav_cartography: "",
+				nav_photogrammetry: "",
+				nav_guessr: "",
+				nav_dataviz2024: "",
+				nav_dataviz2025: "",
+
+				badge_phare: "",
+				badge_heart: "",		
+				
+				project_album_title: "",
+				album_desc: "",
+
+				project_trip_title: "",
+				trip_desc: "",
+					
+				project_cartography_title: "",
+				cartography_desc: "",
+				
+				project_photogra_title: "",
+				photogra_desc: "",
+
+				project_guessr_title: "",
+				guessr_desc: "",
+
+				project_dataviz24_title: "",
+				dataviz24_desc: "",
+
+				project_dataviz25_title: "",
+				dataviz25_desc: "",
+
+				see_project: "",
+				play: "",
+				footer: "",
+				footer_update: ""
+			}
 		};
 
 // vérifie si l'utilisateur a déjà choisi une langue
