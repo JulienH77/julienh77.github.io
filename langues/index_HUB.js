@@ -464,47 +464,47 @@
 				footer: "© 2025 Julien Houziaux — Solo per divertimento",
 				footer_update: "Ultimo aggiornamento: gennaio 2026"
 			},
-			mi: {
-				tab_title: "Julien Houziaux | Ngā Kaupapa",
+			hu: {
+				tab_title: "Julien Houziaux | Projektek",
 				name: "Julien Houziaux",
-				subtitle: "Ngā kaupapa mahere me ngā paetukutuku taunekeneke",
-
-				nav_album: "Pukaemi",
-				nav_trip: "Ngā Haerenga",
-				nav_cartography: "Te Mahere",
-				nav_photogrammetry: "Whakaahua-ira",
+				subtitle: "Térképezési projektek és interaktív weboldalak",
+				
+				nav_album: "Album",
+				nav_trip: "Útvonalak",
+				nav_cartography: "Térképezés",
+				nav_photogrammetry: "Fotogrammetry",
 				nav_guessr: "Guessr",
 				nav_dataviz2024: "Dataviz 2024",
 				nav_dataviz2025: "Dataviz 2025",
-
-				badge_phare: "Kaupapa matua",
-				badge_heart: "Kaupapa ngākau",		
 				
-				project_album_title: "Pukaemi Hararei",
-				album_desc: "He mahere tauwhitiwhiti me ngā whakaahua o aku haerenga mai i te tau 2025.",
-
-				project_trip_title: "Ngā Hararei o Rajets",
-				trip_desc: "He whakaahua pakiwaituhi o aku haerenga me ngā momo waka.",
-					
-				project_cartography_title: "Te Mahere",
-				cartography_desc: "He mahere kaupapa i hangaia ki QGIS me Wonderdraft.",
+				badge_phare: "Zászlóshajó projekt",
+				badge_heart: "Szenvedély projekt",
 				
-				project_photogra_title: "Whakaahua-ira",
-				photogra_desc: "Ngā tauira 3D o ngā whakamaharatanga me ngā whakaaro mō tētahi whare taonga mariko.",
-
+				project_album_title: "Nyaralási album",
+				album_desc: "Interaktív térkép és fotók az utazásaimról 2025-től.",
+				
+				project_trip_title: "Nyaralási utazások",
+				trip_desc: "Útvonalaim és utazási eszközeim animált vizualizációja közlekedés.",
+				
+				project_cartography_title: "Térképezés",
+				cartography_desc: "Tematikus térképek QGIS és Wonderdraft segítségével.",
+				
+				project_photogra_title: "Fotogrammetriai adatok",
+				photogra_desc: "Emlékművek 3D-s modelljei és ötletek egy virtuális múzeumhoz.",
+				
 				project_guessr_title: "Haute-Marne Guessr",
-				guessr_desc: "He kēmu iti i te momo GeoGuessr, e wātea ana ki Haute-Marne anake.",
+				guessr_desc: "Minijáték a GeoGuessr stílusában, Haute-Marne-ra korlátozva.",
+				
+				project_dataviz24_title: "Dataviz Verseny 2024",
+				dataviz24_desc: "Interaktív térkép a Grand Est régió villamosenergia-termeléséről/fogyasztásáról.",
 
-				project_dataviz24_title: "Whakataetae Dataviz 2024",
-				dataviz24_desc: "He mahere taunekeneke o te whakaputa/whakamahinga hiko i te rohe o Grand Est.",
-
-				project_dataviz25_title: "Whakataetae Dataviz 2025",
-				dataviz25_desc: "He mahere taunekeneke o ngā manu o te rohe o Grand Est.",
-
-				see_project: "Tirohia te kaupapa →",
-				play: "Tākaro →",
-				footer: "© 2025 Julien Houziaux — He mea whakangahau noa iho",
-				footer_update: "Whakahōungia whakamutunga: Hanuere 2026"
+				project_dataviz25_title: "Dataviz Verseny 2025",
+				dataviz25_desc: "Interaktív térkép a Grand Est régió madarairól.",
+				
+				see_project: "Tekintse meg a projektet →",
+				play: "Lejátszás →",
+				footer: "© 2025 Julien Houziaux — Csak a móka kedvéért",
+				footer_update: Utolsó frissítés: 2026. január
 			},
 			ko: {
 				tab_title: "Julien Houziaux | 프로젝트",
