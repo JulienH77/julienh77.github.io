@@ -504,7 +504,7 @@
 				see_project: "Tekintse meg a projektet →",
 				play: "Lejátszás →",
 				footer: "© 2025 Julien Houziaux — Csak a móka kedvéért",
-				footer_update: Utolsó frissítés: 2026. január
+				footer_update: "Utolsó frissítés: 2026. január"
 			},
 			ko: {
 				tab_title: "Julien Houziaux | 프로젝트",
