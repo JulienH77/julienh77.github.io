@@ -39,7 +39,7 @@
 				see_project: "Voir le projet →",
 				play: "Jouer →",
 				footer: "© 2025 Julien Houziaux — Seulement par pur amusement",
-				footer_update: "Dernière mise à jour : janvier 2026"
+				footer_update: "Dernière mise à jour : Juillet 2026"
 			},
 
 			en: {
@@ -82,7 +82,7 @@
 				see_project: "View project →",
 				play: "Play →",
 				footer: "© 2025 Julien Houziaux — Just for fun",
-				footer_update: "Last updated: January 2026"
+				footer_update: "Last updated: July 2026"
 
 			},
 
@@ -126,7 +126,7 @@
 				see_project: "檢視項目 →",
 				play: "播放 →",
 				footer: "© 2025 Julien Houziaux — 僅供娛樂",
-				footer_update: "最後更新時間：2026年1月"
+				footer_update: "最後更新時間：2026年7月"
 			},
 			cn: {
 				tab_title: "Julien Houziaux | 项目",
@@ -168,7 +168,7 @@
 				see_project: "检视项目 →",
 				play: "播放 →",
 				footer: "© 2025 Julien Houziaux — 仅供娱乐",
-				footer_update: "最后更新时间：2026年1月"
+				footer_update: "最后更新时间：2026年7月"
 			},
 			ar: {
 				tab_title: " المشاريع | Julien Houziaux",
